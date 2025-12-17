@@ -1522,8 +1522,8 @@
         <button onclick="generateTickets()" class="action-btn primary">Generate Tickets</button>
 
         <div class="flex flex-col items-center text-xs text-gray-600">
-            <span class="font-medium">Session spend (est.)</span>
-            <span id="session-ticket-summary">0 tickets | $0</span>
+            <span class="font-medium">This batch</span>
+            <span id="session-ticket-summary">1 ticket | $2</span>
         </div>
 
         <div class="backtest-group">
@@ -1600,20 +1600,16 @@
             // Allow empty input while typing - don't force a value
             if (inputEl.value === '') {
                 document.getElementById('ticket-cost').textContent = '0';
+                updateSessionSummary();
                 return;
             }
 
             let value = parseInt(inputEl.value, 10);
             if (isNaN(value)) return; // Don't interfere while typing
 
-            // Only clamp the value, don't set it (let user type freely)
+            // Update cost displays
             const costSpan = document.getElementById('ticket-cost');
             if (costSpan) costSpan.textContent = (Math.min(Math.max(value, 0), 20000) * 2).toLocaleString();
-
-            // Changing ticket count starts a fresh session spend
-            totalGeneratedTickets = 0;
-            totalGenerateClicks = 0;
-            totalSessionCost = 0;
             updateSessionSummary();
         }
 
@@ -1629,7 +1625,11 @@
         function updateSessionSummary() {
             const el = document.getElementById('session-ticket-summary');
             if (!el) return;
-            el.textContent = `${totalGeneratedTickets} tickets | $${totalSessionCost.toLocaleString()}`;
+            // Show pending batch cost based on current input
+            const ticketInput = document.getElementById('ticket-count');
+            const count = parseInt(ticketInput?.value || '1', 10) || 1;
+            const cost = count * 2;
+            el.textContent = `${count.toLocaleString()} ticket${count !== 1 ? 's' : ''} | $${cost.toLocaleString()}`;
         }
 
         // Generate Tickets
