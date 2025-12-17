@@ -544,13 +544,13 @@ class NumberGenerator:
             if n not in white:
                 white.add(n)
 
-        # Powerball - mix of hot and overdue
+        # Powerball - mix of hot and overdue (filter to valid range 1-26)
         if random.random() < 0.5:
-            hot_pb = [n for n, _ in self.freq_analyzer.get_hot_numbers(5, 'powerball')]
-            pb = random.choice(hot_pb)
+            hot_pb = [n for n, _ in self.freq_analyzer.get_hot_numbers(10, 'powerball') if n <= POWERBALL_MAX]
+            pb = random.choice(hot_pb) if hot_pb else random.randint(1, POWERBALL_MAX)
         else:
-            overdue_pb = [n for n, _, _ in self.gap_analyzer.get_overdue_numbers(5, 'powerball')]
-            pb = random.choice(overdue_pb)
+            overdue_pb = [n for n, _, _ in self.gap_analyzer.get_overdue_numbers(10, 'powerball') if n <= POWERBALL_MAX]
+            pb = random.choice(overdue_pb) if overdue_pb else random.randint(1, POWERBALL_MAX)
 
         return PowerballTicket(tuple(sorted(white)), pb, "hybrid")
 
@@ -604,7 +604,9 @@ class NumberGenerator:
             else:
                 break
 
-        pb = random.choice([n for n, _ in self.freq_analyzer.get_hot_numbers(10, 'powerball')])
+        # Filter to valid powerball range (1-26)
+        hot_pb = [n for n, _ in self.freq_analyzer.get_hot_numbers(15, 'powerball') if n <= POWERBALL_MAX]
+        pb = random.choice(hot_pb) if hot_pb else random.randint(1, POWERBALL_MAX)
 
         return PowerballTicket(tuple(sorted(white)), pb, "pair_based")
 
