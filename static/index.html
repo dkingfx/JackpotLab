@@ -2156,13 +2156,11 @@
 
             // Hot pairs
             document.getElementById('hot-pairs').innerHTML = analysisData.hot_pairs.map(p => `
-                <div class="flex items-center justify-between text-sm">
-                    <div class="flex items-center gap-1">
-                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white border-2 border-gray-300 font-bold text-xs">${p.pair[0]}</span>
-                        <span class="text-gray-400 text-xs">&</span>
-                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white border-2 border-gray-300 font-bold text-xs">${p.pair[1]}</span>
-                    </div>
-                    <span class="text-gray-500 text-xs">${p.count}×</span>
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white border-2 border-gray-300 font-bold text-xs">${p.pair[0]}</span>
+                    <span class="text-gray-400 text-xs">&</span>
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white border-2 border-gray-300 font-bold text-xs">${p.pair[1]}</span>
+                    <span class="text-gray-500 text-xs ml-1">${p.count}×</span>
                 </div>
             `).join('');
 
