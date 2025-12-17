@@ -1522,8 +1522,8 @@
         <button onclick="generateTickets()" class="action-btn primary">Generate Tickets</button>
 
         <div class="flex flex-col items-center text-xs text-gray-600">
-            <span class="font-medium">This batch</span>
-            <span id="session-ticket-summary">1 ticket | $2</span>
+            <span class="font-medium">Session total</span>
+            <span id="session-ticket-summary">0 tickets | $0</span>
         </div>
 
         <div class="backtest-group">
@@ -1601,27 +1601,20 @@
             const numValue = parseInt(value, 10);
 
             // Calculate cost (0 if empty/invalid, otherwise value * 2)
-            let displayCount = 0;
             let displayCost = 0;
-
             if (value !== '' && !isNaN(numValue) && numValue > 0) {
-                displayCount = Math.min(numValue, 20000);
-                displayCost = displayCount * 2;
+                displayCost = Math.min(numValue, 20000) * 2;
             }
 
-            // Update the cost label next to input
+            // Update ONLY the cost label next to input (not the session total)
             const costSpan = document.getElementById('ticket-cost');
             if (costSpan) costSpan.textContent = displayCost.toLocaleString();
+        }
 
-            // Update the footer batch display
-            const summaryEl = document.getElementById('session-ticket-summary');
-            if (summaryEl) {
-                if (displayCount === 0) {
-                    summaryEl.textContent = '0 tickets | $0';
-                } else {
-                    summaryEl.textContent = `${displayCount.toLocaleString()} ticket${displayCount !== 1 ? 's' : ''} | $${displayCost.toLocaleString()}`;
-                }
-            }
+        function updateSessionSummary() {
+            const el = document.getElementById('session-ticket-summary');
+            if (!el) return;
+            el.textContent = `${totalGeneratedTickets.toLocaleString()} tickets | $${totalSessionCost.toLocaleString()}`;
         }
 
         function validateTicketInput(inputEl) {
