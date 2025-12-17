@@ -1923,16 +1923,15 @@
             const data = await response.json();
             const summary = data.summary;
 
-            // Calculate values - you buy tickets ONCE, test against multiple draws
-            const ticketCost = summary.ticket_cost;
-            const avgWonPerDraw = summary.total_won / summary.num_draws;
-            const avgProfitPerDraw = avgWonPerDraw - ticketCost;
-            const avgRoi = ((avgWonPerDraw / ticketCost) - 1) * 100;
+            // Calculate values - simulate buying tickets for EACH draw
+            const ticketCostPerDraw = summary.ticket_cost;
+            const totalCost = ticketCostPerDraw * summary.num_draws;
+            const totalWon = summary.total_won;
+            const netResult = totalWon - totalCost;
+            const roi = totalCost > 0 ? ((totalWon / totalCost) - 1) * 100 : 0;
 
             // Calculate total prize matches
             const totalMatches = Object.values(summary.by_tier).reduce((sum, count) => sum + count, 0);
-            const totalComparisons = currentTickets.length * summary.num_draws;
-            const matchRate = totalComparisons > 0 ? ((totalMatches / totalComparisons) * 100).toFixed(1) : 0;
 
             let html = `
                 <div class="test-results-panel">
@@ -1945,19 +1944,19 @@
                     <!-- Stats Row -->
                     <div class="stats-row">
                         <div class="stat-box">
-                            <div class="label">Comparisons</div>
-                            <div class="value blue">${totalComparisons.toLocaleString()}</div>
-                            <div class="subtext">ticket-draw pairs</div>
+                            <div class="label">Total Cost</div>
+                            <div class="value">$${totalCost.toLocaleString()}</div>
+                            <div class="subtext">$${ticketCostPerDraw.toLocaleString()}/draw × ${summary.num_draws}</div>
                         </div>
                         <div class="stat-box">
-                            <div class="label">Prize Matches</div>
-                            <div class="value ${totalMatches > 0 ? 'green' : ''}">${totalMatches}</div>
-                            <div class="subtext">${matchRate}% match rate</div>
+                            <div class="label">Total Won</div>
+                            <div class="value ${totalWon > 0 ? 'green' : ''}">${totalWon > 0 ? '$' + totalWon.toLocaleString() : '$0'}</div>
+                            <div class="subtext">${totalMatches} prize matches</div>
                         </div>
                         <div class="stat-box">
-                            <div class="label">Hypothetical Win</div>
-                            <div class="value ${summary.total_won > 0 ? 'green' : ''}">$${summary.total_won.toLocaleString()}</div>
-                            <div class="subtext">if played on those dates</div>
+                            <div class="label">Net Result</div>
+                            <div class="value ${netResult >= 0 ? 'green' : 'red'}">${netResult >= 0 ? '+' : '-'}$${Math.abs(netResult).toLocaleString()}</div>
+                            <div class="subtext">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}% ROI</div>
                         </div>
                     </div>
 
@@ -2480,14 +2479,15 @@
             const data = await response.json();
             const summary = data.summary;
 
-            // Calculate values
-            const ticketCost = summary.ticket_cost;
-            const avgWonPerDraw = summary.total_won / summary.num_draws;
-            const avgProfitPerDraw = avgWonPerDraw - ticketCost;
+            // Calculate values - simulate buying tickets for EACH draw
+            const ticketCostPerDraw = summary.ticket_cost;
+            const totalCost = ticketCostPerDraw * summary.num_draws;
+            const totalWon = summary.total_won;
+            const netResult = totalWon - totalCost;
+            const roi = totalCost > 0 ? ((totalWon / totalCost) - 1) * 100 : 0;
+
             // Calculate total prize matches
             const totalMatches = Object.values(summary.by_tier).reduce((sum, count) => sum + count, 0);
-            const totalComparisons = currentTickets.length * summary.num_draws;
-            const matchRate = totalComparisons > 0 ? ((totalMatches / totalComparisons) * 100).toFixed(1) : 0;
 
             let html = `
                 <div class="test-results-panel">
@@ -2500,19 +2500,19 @@
                     <!-- Stats Row -->
                     <div class="stats-row">
                         <div class="stat-box">
-                            <div class="label">Comparisons</div>
-                            <div class="value blue">${totalComparisons.toLocaleString()}</div>
-                            <div class="subtext">ticket-draw pairs</div>
+                            <div class="label">Total Cost</div>
+                            <div class="value">$${totalCost.toLocaleString()}</div>
+                            <div class="subtext">$${ticketCostPerDraw.toLocaleString()}/draw × ${summary.num_draws}</div>
                         </div>
                         <div class="stat-box">
-                            <div class="label">Prize Matches</div>
-                            <div class="value ${totalMatches > 0 ? 'green' : ''}">${totalMatches}</div>
-                            <div class="subtext">${matchRate}% match rate</div>
+                            <div class="label">Total Won</div>
+                            <div class="value ${totalWon > 0 ? 'green' : ''}">${totalWon > 0 ? '$' + totalWon.toLocaleString() : '$0'}</div>
+                            <div class="subtext">${totalMatches} prize matches</div>
                         </div>
                         <div class="stat-box">
-                            <div class="label">Hypothetical Win</div>
-                            <div class="value ${summary.total_won > 0 ? 'green' : ''}">$${summary.total_won.toLocaleString()}</div>
-                            <div class="subtext">if played on those dates</div>
+                            <div class="label">Net Result</div>
+                            <div class="value ${netResult >= 0 ? 'green' : 'red'}">${netResult >= 0 ? '+' : '-'}$${Math.abs(netResult).toLocaleString()}</div>
+                            <div class="subtext">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}% ROI</div>
                         </div>
                     </div>
 
