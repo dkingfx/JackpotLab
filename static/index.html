@@ -218,6 +218,30 @@
             justify-content: center;
         }
 
+        @media (max-width: 1200px) {
+            .tickets-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .historical-sidebar {
+                order: -1;
+                min-width: unset;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tickets-wrapper {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .tickets-grid {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 12px;
+            }
+            .ticket-card {
+                max-width: 100%;
+            }
+        }
+
         /* Historical Winners Sidebar - Always visible */
         .historical-sidebar {
             background: linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%);
@@ -1522,11 +1546,13 @@
                 <div class="historical-match ${matchClass}">
                     <div>
                         <span class="match-icon">${icon}</span>
-                        <span class="match-title">Historical Match!</span>
+                        <span class="match-title">Historical Match</span>
                     </div>
                     <div class="match-details">
-                        Won <span class="match-prize">${match.prize}</span> on ${match.date}
-                        <br>${match.white_matches} white balls ${match.powerball_match ? '+ Powerball' : ''}
+                        This ticket would have won
+                        <span class="match-prize">${match.prize}</span>
+                        on ${match.date}
+                        <br>Prize tier: ${match.match_type} (${match.white_matches} white balls${match.powerball_match ? ' + Powerball' : ''})
                     </div>
                 </div>
             `;
