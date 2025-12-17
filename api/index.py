@@ -126,7 +126,7 @@ def api_generate():
         return '', 204
 
     data = request.json or {}
-    count = min(int(data.get('count', 1)), 100)
+    count = min(int(data.get('count', 1)), 5000)  # Max 5000 for Vercel
     strategy = data.get('strategy', 'mixed')
 
     strategies = ['random', 'frequency', 'hybrid', 'importance']
