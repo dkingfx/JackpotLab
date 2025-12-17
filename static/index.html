@@ -1355,7 +1355,11 @@
                         </select>
                     </div>
 
-                    <div class="text-sm text-gray-600 mb-4 p-3 bg-gray-50 rounded">
+                    <button onclick="generateTickets()" class="w-full py-3 mb-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-md">
+                        Generate Tickets
+                    </button>
+
+                    <div class="text-sm text-gray-600 p-3 bg-gray-50 rounded">
                         <strong>Mathematical Strategies:</strong>
                         <ul class="mt-2 space-y-1">
                             <li><span class="font-medium text-purple-700">Importance Sampling:</span> P(n) = w(n)/Σw - rigorous weighted sampling</li>
@@ -1371,10 +1375,6 @@
                             potentially reaching historical patterns faster on average.
                         </p>
                     </div>
-
-                    <button onclick="generateTickets()" class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-md">
-                        Generate Tickets
-                    </button>
                 </div>
 
                 <!-- Generated Tickets -->
