@@ -783,16 +783,16 @@
             border: 2px solid #b91c1c;
         }
 
-        /* History Ball Styles - compact for 2-column layout */
+        /* History Ball Styles - compact for 3-column layout */
         .history-ball {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
@@ -1640,7 +1640,7 @@
                         <option value="all">All Years</option>
                     </select>
                 </div>
-                <div id="history-container" class="grid grid-cols-2 gap-3 overflow-y-auto pr-2 flex-1"></div>
+                <div id="history-container" class="grid grid-cols-3 gap-2 overflow-y-auto pr-2 flex-1"></div>
             </div>
         </div>
     </main>
@@ -2738,13 +2738,12 @@
             }
 
             document.getElementById('history-container').innerHTML = filteredDraws.map(d => `
-                <div class="flex items-center gap-1 p-2 bg-gray-50 rounded-lg">
-                    <span class="text-gray-600 text-xs w-20 shrink-0">${d.date}</span>
-                    <div class="flex items-center gap-0.5 flex-1">
+                <div class="flex items-center gap-1 p-1.5 bg-gray-50 rounded">
+                    <span class="text-gray-500 text-xs w-16 shrink-0">${d.date.slice(0,5)}</span>
+                    <div class="flex items-center gap-px">
                         ${d.white_balls.map(n => `<span class="history-ball white">${n}</span>`).join('')}
                         <span class="history-ball red">${d.powerball}</span>
                     </div>
-                    <span class="text-xs text-gray-500 shrink-0">${d.multiplier}x</span>
                 </div>
             `).join('');
         }
