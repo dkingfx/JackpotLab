@@ -106,7 +106,7 @@ def check_historical_match(white_balls, powerball):
 def generate_tickets():
     """Generate tickets."""
     data = request.json
-    count = min(int(data.get('count', 1)), 1000)  # Max 1000 tickets
+    count = min(int(data.get('count', 1)), 20000)  # Max 20,000 tickets
     strategy = data.get('strategy', 'mixed')
 
     tickets = generator.generate_tickets(count, strategy)
