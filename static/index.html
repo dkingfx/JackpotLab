@@ -447,12 +447,12 @@
             font-weight: 900;
         }
 
-        /* Action Footer Styles */
+        /* Action Footer Styles - Desktop only */
         .action-footer {
             background: #ffffff;
             border-top: 1px solid #e5e7eb;
             padding: 10px 24px;
-            display: flex !important;
+            display: none; /* Hidden by default, shown on desktop via Tailwind md:flex */
             align-items: center;
             justify-content: space-between;
             gap: 16px;
@@ -600,10 +600,9 @@
         }
 
         @media (max-width: 640px) {
-            /* Mobile action footer styles */
+            /* Hide action footer on mobile - mobile has inline controls */
             .action-footer {
-                display: flex !important;
-                padding: 8px 12px !important;
+                display: none !important;
             }
             /* Mobile action bar styles */
             .mobile-action-bar {
@@ -706,6 +705,65 @@
             #tickets-count,
             #tickets-tier-breakdown {
                 display: none;
+            }
+
+            /* Mobile Playslip Styles - Force single column and smaller balls */
+            .playslip-grid {
+                grid-template-columns: 1fr !important;
+                gap: 8px;
+            }
+
+            .playslip-table {
+                width: 100%;
+            }
+
+            .playslip-table th,
+            .playslip-table td {
+                padding: 4px 2px;
+            }
+
+            /* Column widths on mobile */
+            .playslip-table th:nth-child(1),
+            .playslip-table td:nth-child(1) {
+                width: 30px;
+            }
+
+            .playslip-table th:nth-child(3),
+            .playslip-table td:nth-child(3) {
+                width: 40px;
+            }
+
+            /* Hide strategy column on mobile */
+            .playslip-table th:nth-child(4),
+            .playslip-table td:nth-child(4) {
+                display: none;
+            }
+
+            /* Smaller balls on mobile */
+            .playslip-number {
+                width: 24px !important;
+                height: 24px !important;
+                font-size: 11px !important;
+                margin: 0 !important;
+                margin-right: 2px !important;
+            }
+
+            .playslip-column .playslip-number {
+                width: 24px !important;
+                height: 24px !important;
+                font-size: 11px !important;
+            }
+
+            .playslip-row-num {
+                font-size: 11px;
+                width: 25px;
+            }
+
+            /* Bigger history balls on mobile */
+            .history-ball {
+                width: 30px;
+                height: 30px;
+                font-size: 13px;
             }
         }
 
@@ -1723,6 +1781,30 @@
         </div>
 
     </main>
+
+    <!-- Action Footer (Desktop only - mobile has inline controls) -->
+    <div class="action-footer hidden md:flex" style="position: fixed; bottom: 0; left: 0; right: 0; background: white; z-index: 9999; padding: 10px 24px; border-top: 1px solid #e5e7eb;">
+        <button onclick="generateTickets()" class="action-btn primary">Generate Tickets</button>
+
+        <div class="footer-row">
+            <div class="session-info">
+                <span class="session-label">Session:</span>
+                <span id="session-ticket-summary">0 tickets | $0</span>
+            </div>
+
+            <div class="backtest-group">
+                <span class="action-label">Backtest:</span>
+                <select id="action-draws-select" class="action-select">
+                    <option value="1">1 draw</option>
+                    <option value="5">5 draws</option>
+                    <option value="10" selected>10 draws</option>
+                    <option value="20">20 draws</option>
+                    <option value="50">50 draws</option>
+                </select>
+                <button onclick="testAgainstDrawsFromFooter()" class="action-btn secondary">Run</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Disclaimer Footer (desktop only - mobile footer is in content flow) -->
     <div class="hidden md:block flex-shrink-0 bg-gray-800 py-3 px-4">
@@ -2768,6 +2850,9 @@
 
             // Switch to generator tab to show results
             showTab('generator');
+
+            // Scroll to top after backtest completes
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Test Against Draws from Mobile Action Bar
@@ -2866,6 +2951,9 @@
             document.getElementById('test-results-content').innerHTML = html;
             document.getElementById('test-results').classList.remove('hidden');
             showTab('generator');
+
+            // Scroll to top after backtest completes
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Load History
@@ -2891,7 +2979,7 @@
 
             document.getElementById('history-container').innerHTML = filteredDraws.map(d => `
                 <div class="flex items-center gap-1 p-1.5 bg-gray-50 rounded">
-                    <span class="text-gray-500 text-xs w-16 shrink-0">${d.date.slice(0,5)}</span>
+                    <span class="text-gray-500 text-xs w-20 shrink-0">${d.date.slice(0,6)}${d.date.slice(-2)}</span>
                     <div class="flex items-center gap-px">
                         ${d.white_balls.map(n => `<span class="history-ball white">${n}</span>`).join('')}
                         <span class="history-ball red">${d.powerball}</span>
