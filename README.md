@@ -1,6 +1,6 @@
-# JackpotLab
+# JackpotSIM
 
-A mathematical Powerball number generator using **importance sampling** and historical data analysis.
+A Powerball lottery simulator for entertainment. Generate tickets, backtest against historical draws, and experience the thrill without the risk.
 
 ## Features
 
