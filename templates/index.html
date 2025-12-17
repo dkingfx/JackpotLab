@@ -983,6 +983,31 @@
             border: 2px solid #b91c1c;
         }
 
+        /* History Ball Styles - similar to playslip */
+        .history-ball {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .history-ball.white {
+            background: linear-gradient(145deg, #ffffff, #f3f4f6);
+            border: 2px solid #d1d5db;
+            color: #1f2937;
+        }
+
+        .history-ball.red {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+            color: #fff;
+            border: 2px solid #b91c1c;
+        }
+
         .playslip-row-num {
             font-weight: bold;
             color: #6b7280;
@@ -2560,11 +2585,13 @@
             }
 
             document.getElementById('history-container').innerHTML = filteredDraws.map(d => `
-                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <span class="text-gray-600 w-24">${d.date}</span>
-                    ${d.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}
-                    <div class="ball powerball text-sm">${d.powerball}</div>
-                    <span class="ml-auto text-sm text-gray-500">${d.multiplier}x</span>
+                <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                    <span class="text-gray-600 text-sm w-24 shrink-0">${d.date}</span>
+                    <div class="flex items-center gap-1">
+                        ${d.white_balls.map(n => `<span class="history-ball white">${n}</span>`).join('')}
+                        <span class="history-ball red ml-1">${d.powerball}</span>
+                    </div>
+                    <span class="ml-auto text-sm text-gray-500 shrink-0">${d.multiplier}x</span>
                 </div>
             `).join('');
         }
