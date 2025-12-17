@@ -1476,6 +1476,7 @@
         let totalGeneratedTickets = 0;
         let totalGenerateClicks = 0;
         let totalSessionCost = 0;
+        let totalSessionWinnings = 0;
 
         // Mobile nav toggle
         function toggleMobileNav() {
@@ -1539,7 +1540,10 @@
         function updateSessionSummary() {
             const el = document.getElementById('session-ticket-summary');
             if (!el) return;
-            el.textContent = `${totalGeneratedTickets.toLocaleString()} tickets | $${totalSessionCost.toLocaleString()}`;
+            const profit = totalSessionWinnings - totalSessionCost;
+            const profitClass = profit >= 0 ? 'text-green-600' : 'text-red-600';
+            const profitSign = profit >= 0 ? '+' : '';
+            el.innerHTML = `Spent: $${totalSessionCost.toLocaleString()} | Won: <span class="text-green-600 font-bold">$${totalSessionWinnings.toLocaleString()}</span>`;
         }
 
         function validateTicketInput(inputEl) {
@@ -1579,21 +1583,31 @@
             totalGenerateClicks += 1;
             totalGeneratedTickets += data.count;
             totalSessionCost += data.cost;
-            updateSessionSummary();
 
             document.getElementById('tickets-count').textContent = `${data.count} tickets | $${data.cost}`;
 
-            // Separate matching and non-matching tickets
+            // Separate matching and non-matching tickets & calculate winnings
             const matchingTickets = [];
             const nonMatchingTickets = [];
+            let batchWinnings = 0;
             data.tickets.forEach((t, i) => {
                 t._index = i; // Store original index
                 if (t.historical_match) {
                     matchingTickets.push(t);
+                    // Parse prize value and add to winnings
+                    const prize = t.historical_match.prize;
+                    if (prize === 'JACKPOT') {
+                        batchWinnings += 200000000; // $200M jackpot estimate
+                    } else {
+                        const prizeNum = parseInt(prize.replace(/[$,]/g, ''), 10);
+                        if (!isNaN(prizeNum)) batchWinnings += prizeNum;
+                    }
                 } else {
                     nonMatchingTickets.push(t);
                 }
             });
+            totalSessionWinnings += batchWinnings;
+            updateSessionSummary();
 
             // Render non-matching tickets in main grid
             const container = document.getElementById('tickets-container');
