@@ -1418,6 +1418,12 @@
                             </div>
                             <button onclick="testAgainstDrawsFromMobile()" class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Run Backtest</button>
                         </div>
+                        <!-- Mobile Disclaimer Footer (inside content flow) -->
+                        <div id="mobile-disclaimer" class="hidden md:hidden mt-4 py-3 px-4 bg-gray-800 rounded-lg">
+                            <p class="text-center text-xs text-gray-400">
+                                For entertainment purposes only. Not affiliated with Powerball or any state lottery.
+                            </p>
+                        </div>
                         <div class="historical-sidebar">
                             <div class="historical-sidebar-header">
                                 <h3><span>🎯</span> Historical Winners</h3>
@@ -1718,8 +1724,8 @@
 
     </main>
 
-    <!-- Disclaimer Footer (always visible) -->
-    <div class="flex-shrink-0 bg-gray-800 py-3 px-4">
+    <!-- Disclaimer Footer (desktop only - mobile footer is in content flow) -->
+    <div class="hidden md:block flex-shrink-0 bg-gray-800 py-3 px-4">
         <p class="text-center text-xs text-gray-400">
             For entertainment purposes only. Not affiliated with Powerball or any state lottery.
         </p>
@@ -1868,10 +1874,14 @@
                 </div>
             `).join('')}</div>`;
 
-            // Show mobile backtest section after tickets are generated
+            // Show mobile backtest section and disclaimer after tickets are generated
             const mobileBacktest = document.getElementById('mobile-backtest-section');
             if (mobileBacktest) {
                 mobileBacktest.classList.remove('hidden');
+            }
+            const mobileDisclaimer = document.getElementById('mobile-disclaimer');
+            if (mobileDisclaimer) {
+                mobileDisclaimer.classList.remove('hidden');
             }
 
             // Handle historical matches content (sidebar is always visible)
