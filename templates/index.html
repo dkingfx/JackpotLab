@@ -1364,6 +1364,12 @@
 
             const costSpan = document.getElementById('ticket-cost');
             if (costSpan) costSpan.textContent = (value * 2).toLocaleString();
+
+            // Changing ticket count starts a fresh session spend
+            totalGeneratedTickets = 0;
+            totalGenerateClicks = 0;
+            totalSessionCost = 0;
+            updateSessionSummary();
         }
 
         function updateSessionSummary() {
