@@ -776,29 +776,29 @@
             border: 2px solid #b91c1c;
         }
 
-        /* History Ball Styles - similar to playslip */
+        /* History Ball Styles - compact for 2-column layout */
         .history-ball {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         .history-ball.white {
             background: linear-gradient(145deg, #ffffff, #f3f4f6);
-            border: 2px solid #d1d5db;
+            border: 1px solid #d1d5db;
             color: #1f2937;
         }
 
         .history-ball.red {
             background: linear-gradient(145deg, #ef4444, #dc2626);
             color: #fff;
-            border: 2px solid #b91c1c;
+            border: 1px solid #b91c1c;
         }
 
         .playslip-row-num {
@@ -1633,7 +1633,7 @@
                         <option value="all">All Years</option>
                     </select>
                 </div>
-                <div id="history-container" class="space-y-3 overflow-y-auto pr-2 flex-1"></div>
+                <div id="history-container" class="grid grid-cols-2 gap-3 overflow-y-auto pr-2 flex-1"></div>
             </div>
         </div>
     </main>
@@ -2731,13 +2731,13 @@
             }
 
             document.getElementById('history-container').innerHTML = filteredDraws.map(d => `
-                <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                    <span class="text-gray-600 text-sm w-24 shrink-0">${d.date}</span>
-                    <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 p-2 bg-gray-50 rounded-lg">
+                    <span class="text-gray-600 text-xs w-20 shrink-0">${d.date}</span>
+                    <div class="flex items-center gap-0.5 flex-1">
                         ${d.white_balls.map(n => `<span class="history-ball white">${n}</span>`).join('')}
-                        <span class="history-ball red ml-1">${d.powerball}</span>
+                        <span class="history-ball red">${d.powerball}</span>
                     </div>
-                    <span class="ml-auto text-sm text-gray-500 shrink-0">${d.multiplier}x</span>
+                    <span class="text-xs text-gray-500 shrink-0">${d.multiplier}x</span>
                 </div>
             `).join('');
         }
