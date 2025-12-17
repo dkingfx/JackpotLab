@@ -1420,10 +1420,10 @@
         <!-- Simulator Tab -->
         <div id="content-simulator" class="tab-content hidden">
             <div class="grid md:grid-cols-3 gap-6">
-                <!-- Controls -->
+                <!-- Budget Simulator (Left) -->
                 <div class="stat-card">
-                    <h2 class="text-xl font-bold mb-4">Budget Simulator</h2>
-                    <p class="text-gray-600 mb-4">
+                    <h2 class="text-xl font-bold mb-2">Budget Simulator</h2>
+                    <p class="text-gray-600 mb-4 text-sm">
                         See how your ticket budget would perform against a recent drawing.
                         Test your strategy's profit/loss potential!
                     </p>
@@ -1461,13 +1461,17 @@
                     </div>
 
                     <button onclick="runBudgetSimulation()" id="sim-button"
-                            class="w-full bg-gradient-to-r from-blue-600 to-red-600 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-red-700 transition">
+                            class="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white py-3 rounded-lg font-bold hover:from-red-600 hover:to-pink-600 transition">
                         Simulate Purchase
                     </button>
+                </div>
 
-                    <div class="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
-                        <strong>Prize Tiers:</strong>
-                        <ul class="mt-1 space-y-0.5">
+                <!-- Prize Tiers (Center) -->
+                <div class="stat-card">
+                    <h2 class="text-xl font-bold mb-4 text-red-500">Prize Tiers</h2>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-sm font-medium text-gray-700 mb-3">Prize Tiers:</p>
+                        <ul class="space-y-1.5 text-sm text-gray-600">
                             <li>5+PB: Jackpot (~$200M)</li>
                             <li>5+0: $1,000,000</li>
                             <li>4+PB: $50,000</li>
@@ -1481,9 +1485,9 @@
                     </div>
                 </div>
 
-                <!-- Test Your Numbers -->
+                <!-- Test Your Numbers (Right) -->
                 <div class="stat-card">
-                    <h2 class="text-xl font-bold mb-4">Test Your Numbers</h2>
+                    <h2 class="text-xl font-bold mb-2">Test Your Numbers</h2>
                     <p class="text-gray-600 mb-4 text-sm">
                         Enter your lucky numbers and see how they would have performed against recent drawings.
                     </p>
@@ -1491,18 +1495,18 @@
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">White Balls (1-69)</label>
                         <div class="grid grid-cols-5 gap-2">
-                            <input type="number" id="user-white-1" min="1" max="69" placeholder="1" class="w-full border rounded-lg px-2 py-2 text-center">
-                            <input type="number" id="user-white-2" min="1" max="69" placeholder="2" class="w-full border rounded-lg px-2 py-2 text-center">
-                            <input type="number" id="user-white-3" min="1" max="69" placeholder="3" class="w-full border rounded-lg px-2 py-2 text-center">
-                            <input type="number" id="user-white-4" min="1" max="69" placeholder="4" class="w-full border rounded-lg px-2 py-2 text-center">
-                            <input type="number" id="user-white-5" min="1" max="69" placeholder="5" class="w-full border rounded-lg px-2 py-2 text-center">
+                            <input type="number" id="user-white-1" min="1" max="69" value="1" class="w-full border rounded-lg px-2 py-2 text-center">
+                            <input type="number" id="user-white-2" min="1" max="69" value="2" class="w-full border rounded-lg px-2 py-2 text-center">
+                            <input type="number" id="user-white-3" min="1" max="69" value="3" class="w-full border rounded-lg px-2 py-2 text-center">
+                            <input type="number" id="user-white-4" min="1" max="69" value="4" class="w-full border rounded-lg px-2 py-2 text-center">
+                            <input type="number" id="user-white-5" min="1" max="69" value="5" class="w-full border rounded-lg px-2 py-2 text-center">
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Powerball (1-26)</label>
                         <div class="flex items-center gap-2">
-                            <input type="number" id="user-powerball" min="1" max="26" placeholder="PB" class="w-20 border rounded-lg px-2 py-2 text-center border-red-300 bg-red-50">
+                            <input type="number" id="user-powerball" min="1" max="26" value="1" class="w-20 border rounded-lg px-2 py-2 text-center border-red-300 bg-red-50">
                             <span class="text-xs text-gray-500">Red ball</span>
                         </div>
                     </div>
@@ -1518,7 +1522,7 @@
                         </select>
                     </div>
 
-                    <button onclick="testUserNumbers()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-bold hover:from-purple-700 hover:to-pink-700 transition">
+                    <button onclick="testUserNumbers()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg font-bold hover:from-purple-600 hover:to-pink-600 transition">
                         Test My Numbers
                     </button>
 
@@ -1526,7 +1530,7 @@
                     </div>
                 </div>
 
-                <!-- Results Summary -->
+                <!-- Simulation Results (Full Width Bottom) -->
                 <div class="stat-card md:col-span-3">
                     <h3 class="text-lg font-bold mb-4">Simulation Results</h3>
                     <div id="sim-results">
