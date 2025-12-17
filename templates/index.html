@@ -33,8 +33,14 @@
             display: flex;
             gap: 8px;
             border-bottom: 2px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            background: #f3f4f6;
+            z-index: 30;
+            padding-top: 4px;
+            margin-top: -16px;
+            padding-bottom: 8px;
             margin-bottom: 24px;
-            position: relative;
         }
 
         .tab-btn {
@@ -784,12 +790,21 @@
                 width: 100%;
                 padding: 10px 14px;
                 font-size: 14px;
-            }
-            .tab-nav {
-                display: none;
+                position: sticky;
+                top: 0;
+                z-index: 30;
+                margin-top: -16px;
+                margin-bottom: 8px;
             }
             .mobile-nav {
                 width: 100%;
+                position: sticky;
+                top: 44px;
+                z-index: 29;
+                background: #f3f4f6;
+            }
+            .tab-nav {
+                display: none;
             }
             .mobile-nav button {
                 font-size: 14px;
