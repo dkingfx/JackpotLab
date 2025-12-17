@@ -801,35 +801,62 @@
             }
         }
 
+        /* Footer row layout */
+        .footer-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            width: 100%;
+        }
+        .session-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .session-label {
+            font-weight: 500;
+        }
+
         @media (max-width: 640px) {
             .action-footer {
                 flex-direction: column;
-                gap: 8px;
-                padding: 10px 16px;
+                gap: 6px;
+                padding: 8px 12px;
             }
             .action-btn {
                 width: 100%;
-                padding: 10px 20px;
+                padding: 8px 16px;
                 font-size: 13px;
             }
             .action-btn.secondary {
                 width: auto;
-                padding: 8px 16px;
-                font-size: 12px;
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+            .footer-row {
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .session-info {
+                font-size: 11px;
             }
             .backtest-group {
-                width: 100%;
-                justify-content: center;
-                padding: 8px 12px;
-                gap: 6px;
+                padding: 0;
+                gap: 4px;
+                background: none;
+                border: none;
             }
             .action-select {
-                padding: 6px 10px;
-                font-size: 12px;
-                min-width: 80px;
+                padding: 4px 8px;
+                font-size: 11px;
+                min-width: 70px;
             }
             .action-label {
-                font-size: 11px;
+                font-size: 10px;
             }
             /* Mobile form elements */
             .stat-card {
@@ -1445,21 +1472,23 @@
     <div class="action-footer">
         <button onclick="generateTickets()" class="action-btn primary">Generate Tickets</button>
 
-        <div class="flex flex-col items-center text-xs text-gray-600">
-            <span class="font-medium">Session total</span>
-            <span id="session-ticket-summary">0 tickets | $0</span>
-        </div>
+        <div class="footer-row">
+            <div class="session-info">
+                <span class="session-label">Session:</span>
+                <span id="session-ticket-summary">0 tickets | $0</span>
+            </div>
 
-        <div class="backtest-group">
-            <span class="action-label">Backtest:</span>
-            <select id="action-draws-select" class="action-select">
-                <option value="1">1 draw</option>
-                <option value="5">5 draws</option>
-                <option value="10" selected>10 draws</option>
-                <option value="20">20 draws</option>
-                <option value="50">50 draws</option>
-            </select>
-            <button onclick="testAgainstDrawsFromFooter()" class="action-btn secondary">Run</button>
+            <div class="backtest-group">
+                <span class="action-label">Backtest:</span>
+                <select id="action-draws-select" class="action-select">
+                    <option value="1">1 draw</option>
+                    <option value="5">5 draws</option>
+                    <option value="10" selected>10 draws</option>
+                    <option value="20">20 draws</option>
+                    <option value="50">50 draws</option>
+                </select>
+                <button onclick="testAgainstDrawsFromFooter()" class="action-btn secondary">Run</button>
+            </div>
         </div>
     </div>
 
