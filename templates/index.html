@@ -1231,11 +1231,6 @@
         </div>
     </header>
 
-    <!-- Mobile Action Bar (visible only on mobile) -->
-    <div class="mobile-action-bar">
-        <button onclick="generateTickets()" class="action-btn primary" style="width: 100%;">Generate Tickets</button>
-    </div>
-
     <!-- Tab Navigation (Sticky below header) -->
     <nav class="tab-nav hidden md:flex">
         <button onclick="showTab('generator')" id="tab-generator" class="tab-btn tab-active">
@@ -1307,6 +1302,9 @@
                         </p>
                     </div>
 
+                    <button onclick="generateTickets()" class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-md">
+                        Generate Tickets
+                    </button>
                 </div>
 
                 <!-- Generated Tickets -->
@@ -1338,19 +1336,17 @@
                             </div>
                         </div>
                         <!-- Mobile Backtest (appears after tickets on mobile) -->
-                        <div id="mobile-backtest-section" class="hidden md:hidden mt-4 p-4 bg-white rounded-lg border border-gray-200">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm font-medium text-gray-700">Backtest against</span>
-                                    <select id="mobile-draws-select" class="border border-gray-300 rounded px-2 py-1 text-sm">
-                                        <option value="1">1 draw</option>
-                                        <option value="5">5 draws</option>
-                                        <option value="10" selected>10 draws</option>
-                                        <option value="20">20 draws</option>
-                                    </select>
-                                </div>
-                                <button onclick="testAgainstDrawsFromMobile()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Run Backtest</button>
+                        <div id="mobile-backtest-section" class="hidden md:hidden mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="flex items-center justify-center gap-2 mb-3">
+                                <span class="text-sm font-medium text-gray-700">Backtest against</span>
+                                <select id="mobile-draws-select" class="border border-gray-300 rounded px-3 py-2 text-sm bg-white">
+                                    <option value="1">1 draw</option>
+                                    <option value="5">5 draws</option>
+                                    <option value="10" selected>10 draws</option>
+                                    <option value="20">20 draws</option>
+                                </select>
                             </div>
+                            <button onclick="testAgainstDrawsFromMobile()" class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Run Backtest</button>
                         </div>
                         <!-- Historical Winners - Always Visible -->
                         <div class="historical-sidebar">
@@ -1375,14 +1371,14 @@
         <!-- Tickets Tab (Printable List View) -->
         <div id="content-tickets" class="tab-content hidden">
             <div class="stat-card">
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                     <div>
-                        <h2 class="text-xl font-bold">All Tickets - Playslip View</h2>
-                        <p class="text-sm text-gray-500">Compact view for filling out official lottery playslips</p>
+                        <h2 class="text-lg sm:text-xl font-bold">All Tickets - Playslip View</h2>
+                        <p class="text-xs sm:text-sm text-gray-500">Compact view for filling out official lottery playslips</p>
                     </div>
-                    <div class="flex gap-2">
-                        <span id="printable-tickets-count" class="text-gray-500 font-medium"></span>
-                        <button onclick="window.print()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm">
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <span id="printable-tickets-count" class="text-gray-500 font-medium text-sm"></span>
+                        <button onclick="window.print()" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm flex-1 sm:flex-none">
                             Print
                         </button>
                     </div>
@@ -1405,18 +1401,18 @@
         <!-- Analysis Tab -->
         <div id="content-analysis" class="tab-content hidden">
             <!-- Color Legend -->
-            <div class="flex items-center justify-center gap-6 mb-6 py-3 px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full bg-red-500"></span>
-                    <span class="text-sm font-medium text-gray-700">Hot (Above Expected)</span>
+            <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mb-6 py-3 px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-red-500"></span>
+                    <span class="text-xs sm:text-sm font-medium text-gray-700">Hot</span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full bg-blue-500"></span>
-                    <span class="text-sm font-medium text-gray-700">Cold (Below Expected)</span>
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-blue-500"></span>
+                    <span class="text-xs sm:text-sm font-medium text-gray-700">Cold</span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full bg-purple-500"></span>
-                    <span class="text-sm font-medium text-gray-700">Overdue (Not Drawn Recently)</span>
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-purple-500"></span>
+                    <span class="text-xs sm:text-sm font-medium text-gray-700">Overdue</span>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1636,9 +1632,9 @@
         <!-- History Tab -->
         <div id="content-history" class="tab-content hidden">
             <div class="stat-card flex flex-col flex-1 min-h-0">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold">Recent Winning Numbers</h2>
-                    <select id="history-year-select" onchange="filterHistoryByYear()" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+                    <h2 class="text-lg sm:text-xl font-bold">Recent Winning Numbers</h2>
+                    <select id="history-year-select" onchange="filterHistoryByYear()" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="2025">2025</option>
                         <option value="2024">2024</option>
                         <option value="2023">2023</option>
@@ -1647,13 +1643,15 @@
                         <option value="all">All Years</option>
                     </select>
                 </div>
-                <div id="history-container" class="grid grid-cols-3 gap-2 pr-2"></div>
+                <div id="history-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pr-2"></div>
             </div>
         </div>
 
-        <!-- Disclaimer -->
-        <div class="text-center text-xs text-gray-400 py-6 mt-8 border-t border-gray-200">
-            For entertainment purposes only. Not affiliated with Powerball or any state lottery.
+        <!-- Disclaimer Footer -->
+        <div class="mt-8 bg-gray-800 rounded-lg p-4">
+            <p class="text-center text-xs text-gray-300">
+                For entertainment purposes only. Not affiliated with Powerball or any state lottery.
+            </p>
         </div>
     </main>
 
