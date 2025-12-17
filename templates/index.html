@@ -1540,10 +1540,7 @@
         function updateSessionSummary() {
             const el = document.getElementById('session-ticket-summary');
             if (!el) return;
-            const profit = totalSessionWinnings - totalSessionCost;
-            const profitClass = profit >= 0 ? 'text-green-600' : 'text-red-600';
-            const profitSign = profit >= 0 ? '+' : '';
-            el.innerHTML = `Spent: $${totalSessionCost.toLocaleString()} | Won: <span class="text-green-600 font-bold">$${totalSessionWinnings.toLocaleString()}</span>`;
+            el.textContent = `${totalGeneratedTickets.toLocaleString()} tickets | $${totalSessionCost.toLocaleString()}`;
         }
 
         function validateTicketInput(inputEl) {
