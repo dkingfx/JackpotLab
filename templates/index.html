@@ -2180,25 +2180,25 @@
 
             // Hot white balls
             document.getElementById('hot-white').innerHTML = analysisData.hot_white.slice(0, 10).map(n => `
-                <div class="ball white-ball hot text-sm relative">
-                    ${n.number}
-                    <span class="absolute -bottom-4 text-xs text-gray-500">${n.count}</span>
+                <div class="flex flex-col items-center">
+                    <div class="ball white-ball hot text-sm">${n.number}</div>
+                    <span class="text-xs text-gray-500 mt-1">${n.count}</span>
                 </div>
             `).join('');
 
             // Cold white balls
             document.getElementById('cold-white').innerHTML = analysisData.cold_white.slice(0, 10).map(n => `
-                <div class="ball white-ball cold text-sm relative">
-                    ${n.number}
-                    <span class="absolute -bottom-4 text-xs text-gray-500">${n.count}</span>
+                <div class="flex flex-col items-center">
+                    <div class="ball white-ball cold text-sm">${n.number}</div>
+                    <span class="text-xs text-gray-500 mt-1">${n.count}</span>
                 </div>
             `).join('');
 
             // Overdue
             document.getElementById('overdue-white').innerHTML = analysisData.overdue_white.slice(0, 10).map(n => `
-                <div class="ball white-ball overdue text-sm relative" title="${n.gap} draws ago, ${n.ratio.toFixed(1)}x avg">
-                    ${n.number}
-                    <span class="absolute -bottom-4 text-xs text-purple-600">${n.ratio.toFixed(1)}x</span>
+                <div class="flex flex-col items-center" title="${n.gap} draws ago, ${n.ratio.toFixed(1)}x avg">
+                    <div class="ball white-ball overdue text-sm">${n.number}</div>
+                    <span class="text-xs text-purple-600 mt-1">${n.ratio.toFixed(1)}x</span>
                 </div>
             `).join('');
 
