@@ -783,6 +783,55 @@
             color: #4b5563;
         }
 
+        /* 3-Column Playslip Grid */
+        .playslip-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .playslip-column {
+            min-width: 0;
+        }
+
+        .playslip-column .playslip-table {
+            width: 100%;
+            font-size: 11px;
+        }
+
+        .playslip-column .playslip-table th {
+            padding: 6px 4px;
+            font-size: 10px;
+        }
+
+        .playslip-column .playslip-table td {
+            padding: 4px;
+        }
+
+        .playslip-column .playslip-number {
+            width: 24px;
+            height: 24px;
+            font-size: 11px;
+            margin: 0 1px;
+        }
+
+        .playslip-column .playslip-row-num {
+            font-size: 10px;
+            width: 24px;
+        }
+
+        @media print {
+            .playslip-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .playslip-column .playslip-number {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+        }
+
         /* Responsive styles */
         @media (max-width: 1200px) {
             .tickets-grid {
@@ -1806,37 +1855,47 @@
 
             countEl.textContent = `${tickets.length} tickets`;
 
+            // Split tickets into 3 columns
+            const cols = 3;
+            const perCol = Math.ceil(tickets.length / cols);
+            const columns = [];
+            for (let c = 0; c < cols; c++) {
+                columns.push(tickets.slice(c * perCol, (c + 1) * perCol));
+            }
+
             container.innerHTML = `
-                <table class="playslip-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>White Balls (1-69)</th>
-                            <th>Powerball</th>
-                            <th class="no-print">Strategy</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tickets.map((t, i) => `
-                            <tr>
-                                <td class="playslip-row-num">${i + 1}</td>
-                                <td>
-                                    ${t.white_balls.map(n => `<span class="playslip-number playslip-white">${n}</span>`).join('')}
-                                </td>
-                                <td>
-                                    <span class="playslip-number playslip-red">${t.powerball}</span>
-                                </td>
-                                <td class="no-print">
-                                    <span class="playslip-strategy">${formatStrategy(t.strategy)}</span>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+                <div class="playslip-grid">
+                    ${columns.map((colTickets, colIdx) => `
+                        <div class="playslip-column">
+                            <table class="playslip-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Numbers</th>
+                                        <th>PB</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${colTickets.map((t, i) => `
+                                        <tr>
+                                            <td class="playslip-row-num">${colIdx * perCol + i + 1}</td>
+                                            <td>
+                                                ${t.white_balls.map(n => `<span class="playslip-number playslip-white">${n}</span>`).join('')}
+                                            </td>
+                                            <td>
+                                                <span class="playslip-number playslip-red">${t.powerball}</span>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `).join('')}
+                </div>
 
                 <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm no-print">
-                    <strong class="text-yellow-700">💡 Tip:</strong>
-                    <span class="text-yellow-600">Use the Print button to print this list and fill out your official playslips at the store.</span>
+                    <strong class="text-yellow-700">Tip:</strong>
+                    <span class="text-yellow-600">Use Print button to print this list for filling out playslips at the store.</span>
                 </div>
             `;
         }
