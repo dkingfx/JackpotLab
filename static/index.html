@@ -1630,15 +1630,6 @@
             handleTicketInput(inputEl);
         }
 
-        function updateSessionSummary() {
-            const el = document.getElementById('session-ticket-summary');
-            if (!el) return;
-            // Show pending batch cost based on current input
-            const ticketInput = document.getElementById('ticket-count');
-            const count = parseInt(ticketInput?.value || '1', 10) || 1;
-            const cost = count * 2;
-            el.textContent = `${count.toLocaleString()} ticket${count !== 1 ? 's' : ''} | $${cost.toLocaleString()}`;
-        }
 
         // Generate Tickets
         async function generateTickets() {
