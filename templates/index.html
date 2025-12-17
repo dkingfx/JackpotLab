@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JackpotLab - Powerball Number Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .ball {
+            @apply w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg;
+        }
+        .white-ball {
+            @apply bg-white text-gray-800 border-2 border-gray-300 shadow;
+        }
+        .powerball {
+            @apply bg-red-600 text-white shadow;
+        }
+        .hot { @apply ring-2 ring-orange-500; }
+        .cold { @apply ring-2 ring-blue-500; }
+        .overdue { @apply ring-2 ring-purple-500; }
+
+        .ticket-row {
+            @apply flex gap-2 items-center p-3 bg-gray-50 rounded-lg mb-2;
+        }
+
+        .strategy-badge {
+            @apply text-xs px-2 py-1 rounded-full;
+        }
+
+        /* Tab Navigation Styles */
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            font-weight: 500;
+            color: #6b7280;
+            position: relative;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        .tab-btn:hover {
+            color: #1f2937;
+        }
+
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #2563eb, #dc2626);
+            border-radius: 3px 3px 0 0;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .tab-btn.tab-active {
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        .tab-btn.tab-active::after {
+            transform: scaleX(1);
+        }
+
+        .stat-card {
+            @apply bg-white rounded-xl shadow-lg p-6;
+        }
+
+        @keyframes pulse-number {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .number-highlight {
+            animation: pulse-number 0.5s ease-in-out;
+        }
+
+        /* Lottery Ticket Card Styles */
+        .ticket-card {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .ticket-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #ef4444);
+        }
+
+        .ticket-card::after {
+            content: 'POWERBALL';
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 10px;
+            font-weight: bold;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 2px;
+        }
+
+        .ticket-number {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 12px;
+        }
+
+        .ticket-balls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            margin: 16px 0;
+        }
+
+        .ticket-ball {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.3);
+        }
+
+        .ticket-ball.white {
+            background: linear-gradient(145deg, #ffffff, #e0e0e0);
+            color: #1a1a2e;
+            border: 2px solid #ccc;
+        }
+
+        .ticket-ball.red {
+            background: linear-gradient(145deg, #ef4444, #b91c1c);
+            color: white;
+            border: 2px solid #fca5a5;
+            margin-left: 12px;
+        }
+
+        .ticket-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            margin: 12px 0;
+        }
+
+        .ticket-strategy {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .strategy-random { background: rgba(107,114,128,0.3); color: #9ca3af; }
+        .strategy-frequency { background: rgba(249,115,22,0.3); color: #fdba74; }
+        .strategy-overdue { background: rgba(168,85,247,0.3); color: #c4b5fd; }
+        .strategy-hybrid { background: rgba(34,197,94,0.3); color: #86efac; }
+        .strategy-pattern { background: rgba(59,130,246,0.3); color: #93c5fd; }
+        .strategy-pairs { background: rgba(236,72,153,0.3); color: #f9a8d4; }
+        .strategy-importance { background: rgba(234,179,8,0.3); color: #fde047; }
+
+        .ticket-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .ticket-price {
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+        }
+
+        .tickets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        /* Historical Match Styles */
+        .historical-match {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .match-jackpot {
+            background: linear-gradient(135deg, rgba(234,179,8,0.3), rgba(245,158,11,0.2));
+            border: 1px solid rgba(234,179,8,0.5);
+        }
+
+        .match-million {
+            background: linear-gradient(135deg, rgba(34,197,94,0.3), rgba(22,163,74,0.2));
+            border: 1px solid rgba(34,197,94,0.5);
+        }
+
+        .match-50k {
+            background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(37,99,235,0.2));
+            border: 1px solid rgba(59,130,246,0.5);
+        }
+
+        .match-icon {
+            font-size: 16px;
+            margin-right: 6px;
+        }
+
+        .match-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .match-jackpot .match-title { color: #fcd34d; }
+        .match-million .match-title { color: #86efac; }
+        .match-50k .match-title { color: #93c5fd; }
+
+        .match-details {
+            color: rgba(255,255,255,0.7);
+            margin-top: 4px;
+            font-size: 11px;
+        }
+
+        .match-prize {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(234,179,8,0.3); }
+            50% { box-shadow: 0 0 20px rgba(234,179,8,0.5); }
+        }
+
+        .ticket-card.has-match {
+            border: 2px solid rgba(234,179,8,0.5);
+        }
+
+        .ticket-card.has-match::before {
+            background: linear-gradient(90deg, #eab308, #f59e0b, #eab308);
+        }
+
+        /* Shine effect on hover */
+        .ticket-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+        }
+
+        .ticket-card:hover::before {
+            animation: shine 0.5s ease-out;
+        }
+
+        @keyframes shine {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-800 to-red-700 text-white py-6 shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center gap-3">
+                <div class="text-4xl">🎰</div>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">JackpotLab</h1>
+                    <p class="text-blue-200 text-sm font-medium">Powerball Mathematical Analyzer</p>
+                </div>
+            </div>
+            <p class="text-blue-100 mt-3">Statistical analysis & intelligent number generation using importance sampling</p>
+            <div class="mt-4 flex gap-6 text-sm">
+                <div>
+                    <span class="text-blue-200">Historical Draws:</span>
+                    <span class="font-bold">{{ total_draws }}</span>
+                </div>
+                <div>
+                    <span class="text-blue-200">Jackpot Odds:</span>
+                    <span class="font-bold">1 in {{ jackpot_odds }}</span>
+                </div>
+                {% if latest_draw %}
+                <div>
+                    <span class="text-blue-200">Latest Draw:</span>
+                    <span class="font-bold">{{ latest_draw.date.strftime('%m/%d/%Y') }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Tabs -->
+        <nav class="tab-nav">
+            <button onclick="showTab('generator')" id="tab-generator" class="tab-btn tab-active">
+                <span>Generate Tickets</span>
+            </button>
+            <button onclick="showTab('analysis')" id="tab-analysis" class="tab-btn">
+                <span>Analysis</span>
+            </button>
+            <button onclick="showTab('simulator')" id="tab-simulator" class="tab-btn">
+                <span>Jackpot Simulator</span>
+            </button>
+            <button onclick="showTab('history')" id="tab-history" class="tab-btn">
+                <span>Recent Draws</span>
+            </button>
+        </nav>
+
+        <!-- Generator Tab -->
+        <div id="content-generator" class="tab-content">
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Controls -->
+                <div class="stat-card">
+                    <h2 class="text-xl font-bold mb-4">Generate Tickets</h2>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Number of Tickets (Cost: $<span id="ticket-cost">2</span>)
+                        </label>
+                        <input type="number" id="ticket-count" value="1" min="1" max="1000"
+                               class="w-full border rounded-lg px-4 py-2"
+                               oninput="document.getElementById('ticket-cost').textContent = this.value * 2">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Strategy</label>
+                        <select id="strategy" class="w-full border rounded-lg px-4 py-2">
+                            <option value="mixed">Mixed (All Strategies)</option>
+                            <option value="importance">Importance Sampling (Balanced)</option>
+                            <option value="importance_hot">Importance Sampling (Hot Biased)</option>
+                            <option value="importance_due">Importance Sampling (Due Biased)</option>
+                            <option value="hybrid">Hybrid (Hot + Overdue)</option>
+                            <option value="frequency">Frequency Weighted (Hot Numbers)</option>
+                            <option value="overdue">Overdue Weighted (Due Numbers)</option>
+                            <option value="pattern">Pattern Optimized</option>
+                            <option value="pairs">Pair Based</option>
+                            <option value="random">Pure Random</option>
+                        </select>
+                    </div>
+
+                    <div class="text-sm text-gray-600 mb-4 p-3 bg-gray-50 rounded">
+                        <strong>Mathematical Strategies:</strong>
+                        <ul class="mt-2 space-y-1">
+                            <li><span class="font-medium text-purple-700">Importance Sampling:</span> P(n) = w(n)/Σw - rigorous weighted sampling</li>
+                            <li><span class="font-medium">Mixed:</span> Combines all strategies</li>
+                            <li><span class="font-medium">Hybrid:</span> 2 hot + 2 overdue + 1 random</li>
+                            <li><span class="font-medium">Frequency:</span> Weighted by historical frequency</li>
+                            <li><span class="font-medium">Overdue:</span> Weighted by gap analysis</li>
+                            <li><span class="font-medium">Pattern:</span> Matches even/odd, sum distributions</li>
+                        </ul>
+                        <p class="mt-2 text-xs text-purple-600">
+                            Importance sampling produces numbers more often based on observed distributions,
+                            potentially reaching historical patterns faster on average.
+                        </p>
+                    </div>
+
+                    <button onclick="generateTickets()"
+                            class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                        Generate Tickets
+                    </button>
+
+                    <button onclick="testAgainstLatest()"
+                            class="w-full mt-3 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition">
+                        Test Against Latest Draw
+                    </button>
+                </div>
+
+                <!-- Generated Tickets -->
+                <div class="stat-card md:col-span-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Your Tickets</h2>
+                        <span id="tickets-count" class="text-gray-500 font-medium"></span>
+                    </div>
+                    <div id="tickets-container">
+                        <div class="text-center py-12 text-gray-400">
+                            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                            </svg>
+                            <p>Generate tickets to see them here</p>
+                        </div>
+                    </div>
+
+                    <div id="test-results" class="mt-4 hidden">
+                        <h3 class="font-bold text-lg mb-2 border-t pt-4">Test Results</h3>
+                        <div id="test-results-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Tab -->
+        <div id="content-analysis" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Hot White Balls -->
+                <div class="stat-card">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <span class="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
+                        Hot White Balls
+                    </h3>
+                    <div id="hot-white" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Cold White Balls -->
+                <div class="stat-card">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                        Cold White Balls
+                    </h3>
+                    <div id="cold-white" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Overdue Numbers -->
+                <div class="stat-card">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <span class="w-3 h-3 bg-purple-500 rounded-full mr-2"></span>
+                        Overdue Numbers
+                    </h3>
+                    <div id="overdue-white" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Powerballs -->
+                <div class="stat-card">
+                    <h3 class="text-lg font-bold mb-4">Powerball Analysis</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">Hot</h4>
+                            <div id="hot-pb" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-600 mb-2">Cold</h4>
+                            <div id="cold-pb" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hot Pairs -->
+                <div class="stat-card">
+                    <h3 class="text-lg font-bold mb-4">Hot Pairs</h3>
+                    <div id="hot-pairs" class="space-y-2"></div>
+                </div>
+
+                <!-- Pattern Stats -->
+                <div class="stat-card">
+                    <h3 class="text-lg font-bold mb-4">Optimal Patterns</h3>
+                    <div id="patterns" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- Frequency Chart -->
+            <div class="stat-card mt-6">
+                <h3 class="text-lg font-bold mb-4">Number Frequency Distribution</h3>
+                <canvas id="frequencyChart" height="100"></canvas>
+            </div>
+        </div>
+
+        <!-- Simulator Tab -->
+        <div id="content-simulator" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="stat-card">
+                    <h2 class="text-xl font-bold mb-4">Jackpot Simulator</h2>
+                    <p class="text-gray-600 mb-4">
+                        Enter your numbers and see how many draws it takes to hit the jackpot.
+                        This demonstrates the astronomical odds of winning.
+                    </p>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">White Balls (5 numbers, 1-69)</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="sim-w1" class="w-16 border rounded px-2 py-1" min="1" max="69">
+                            <input type="number" id="sim-w2" class="w-16 border rounded px-2 py-1" min="1" max="69">
+                            <input type="number" id="sim-w3" class="w-16 border rounded px-2 py-1" min="1" max="69">
+                            <input type="number" id="sim-w4" class="w-16 border rounded px-2 py-1" min="1" max="69">
+                            <input type="number" id="sim-w5" class="w-16 border rounded px-2 py-1" min="1" max="69">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Powerball (1-26)</label>
+                        <input type="number" id="sim-pb" class="w-16 border rounded px-2 py-1" min="1" max="26">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Attempts</label>
+                        <select id="sim-max" class="border rounded px-4 py-2">
+                            <option value="100000">100,000</option>
+                            <option value="1000000" selected>1,000,000</option>
+                            <option value="10000000">10,000,000</option>
+                        </select>
+                    </div>
+
+                    <button onclick="fillRandomNumbers()"
+                            class="w-full mb-2 bg-gray-200 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-300 transition">
+                        Fill Random Numbers
+                    </button>
+
+                    <button onclick="runSimulation()" id="sim-button"
+                            class="w-full bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition">
+                        Run Simulation
+                    </button>
+                </div>
+
+                <div class="stat-card">
+                    <h3 class="text-lg font-bold mb-4">Simulation Results</h3>
+                    <div id="sim-results">
+                        <p class="text-gray-500">Run a simulation to see results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="content-history" class="tab-content hidden">
+            <div class="stat-card">
+                <h2 class="text-xl font-bold mb-4">Recent Winning Numbers</h2>
+                <div id="history-container" class="space-y-3"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <span class="text-2xl">🎰</span>
+                <span class="text-xl font-bold text-gray-200">JackpotLab</span>
+            </div>
+            <p class="text-sm max-w-xl mx-auto">
+                <strong class="text-gray-200">Disclaimer:</strong> This is for entertainment and educational purposes only.
+                Lottery outcomes are random. Past results do not influence future draws.
+                Please gamble responsibly.
+            </p>
+            <p class="mt-3 text-xs">
+                Data source: <a href="https://data.ny.gov" class="text-blue-400 hover:underline">New York State Open Data</a>
+            </p>
+            <p class="mt-2 text-xs text-gray-500">
+                Built with mathematical importance sampling • Not affiliated with Powerball
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        let currentTickets = [];
+        let analysisData = null;
+
+        // Tab Management
+        function showTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('tab-active');
+
+            if (tab === 'analysis' && !analysisData) loadAnalysis();
+            if (tab === 'history') loadHistory();
+        }
+
+        // Generate Tickets
+        async function generateTickets() {
+            const count = document.getElementById('ticket-count').value;
+            const strategy = document.getElementById('strategy').value;
+
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({count, strategy})
+            });
+
+            const data = await response.json();
+            currentTickets = data.tickets;
+
+            document.getElementById('tickets-count').textContent = `${data.count} tickets | $${data.cost}`;
+
+            const container = document.getElementById('tickets-container');
+            container.innerHTML = `<div class="tickets-grid">${data.tickets.map((t, i) => `
+                <div class="ticket-card ${t.historical_match ? 'has-match' : ''}">
+                    <div class="ticket-number">TICKET #${String(i+1).padStart(3, '0')}</div>
+                    <div class="ticket-balls">
+                        ${t.white_balls.map(n => `<div class="ticket-ball white">${n}</div>`).join('')}
+                        <div class="ticket-ball red">${t.powerball}</div>
+                    </div>
+                    <div class="ticket-divider"></div>
+                    <div class="ticket-footer">
+                        <span class="ticket-strategy ${getStrategyClass(t.strategy)}">${formatStrategy(t.strategy)}</span>
+                        <span class="ticket-price">$2.00</span>
+                    </div>
+                    ${t.historical_match ? renderHistoricalMatch(t.historical_match) : ''}
+                </div>
+            `).join('')}</div>`;
+
+            // Show count of historical matches
+            const matchCount = data.tickets.filter(t => t.historical_match).length;
+            if (matchCount > 0) {
+                document.getElementById('tickets-count').innerHTML =
+                    `${data.count} tickets | $${data.cost} | <span class="text-yellow-600 font-bold">${matchCount} historical match${matchCount > 1 ? 'es' : ''}!</span>`;
+            }
+
+            document.getElementById('test-results').classList.add('hidden');
+        }
+
+        function formatStrategy(strategy) {
+            const names = {
+                'random': 'Random',
+                'frequency_weighted': 'Hot Numbers',
+                'overdue_weighted': 'Overdue',
+                'hybrid': 'Hybrid',
+                'pattern_optimized': 'Pattern',
+                'pair_based': 'Pairs',
+                'importance_balanced': 'Importance',
+                'importance_hot_biased': 'Hot Bias',
+                'importance_due_biased': 'Due Bias'
+            };
+            return names[strategy] || strategy;
+        }
+
+        function getStrategyClass(strategy) {
+            if (strategy.includes('importance') || strategy.includes('hot_biased') || strategy.includes('due_biased')) return 'strategy-importance';
+            if (strategy.includes('frequency')) return 'strategy-frequency';
+            if (strategy.includes('overdue')) return 'strategy-overdue';
+            if (strategy.includes('hybrid')) return 'strategy-hybrid';
+            if (strategy.includes('pattern')) return 'strategy-pattern';
+            if (strategy.includes('pair')) return 'strategy-pairs';
+            return 'strategy-random';
+        }
+
+        function renderHistoricalMatch(match) {
+            const matchClass = match.match_type === 'JACKPOT' ? 'match-jackpot' :
+                              match.match_type === '5+0' ? 'match-million' : 'match-50k';
+            const icon = match.match_type === 'JACKPOT' ? '🏆' :
+                        match.match_type === '5+0' ? '⭐' : '🎯';
+
+            return `
+                <div class="historical-match ${matchClass}">
+                    <div>
+                        <span class="match-icon">${icon}</span>
+                        <span class="match-title">Historical Match!</span>
+                    </div>
+                    <div class="match-details">
+                        Won <span class="match-prize">${match.prize}</span> on ${match.date}
+                        <br>${match.white_matches} white balls ${match.powerball_match ? '+ Powerball' : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getStrategyColor(strategy) {
+            const colors = {
+                'random': 'gray',
+                'frequency_weighted': 'orange',
+                'overdue_weighted': 'purple',
+                'hybrid': 'green',
+                'pattern_optimized': 'blue',
+                'pair_based': 'pink'
+            };
+            return colors[strategy] || 'gray';
+        }
+
+        // Test Against Latest Draw
+        async function testAgainstLatest() {
+            if (currentTickets.length === 0) {
+                alert('Generate tickets first!');
+                return;
+            }
+
+            const response = await fetch('/api/test-draw', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({tickets: currentTickets})
+            });
+
+            const data = await response.json();
+
+            const winners = data.results.filter(r => r.prize !== 'No prize');
+
+            let html = `
+                <div class="mb-3 p-3 bg-blue-50 rounded-lg">
+                    <strong>Tested against:</strong> ${data.draw.date}<br>
+                    <div class="flex gap-2 mt-2">
+                        ${data.draw.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}
+                        <div class="ball powerball text-sm">${data.draw.powerball}</div>
+                    </div>
+                </div>
+            `;
+
+            if (winners.length > 0) {
+                html += `<div class="text-green-600 font-bold mb-2">Winners: ${winners.length}</div>`;
+                html += winners.map(r => `
+                    <div class="p-2 bg-green-50 rounded mb-2">
+                        <div class="flex gap-1 mb-1">
+                            ${r.ticket.white_balls.map(n => `<div class="w-8 h-8 rounded-full ${data.draw.white_balls.includes(n) ? 'bg-green-500 text-white' : 'bg-gray-200'} flex items-center justify-center text-sm">${n}</div>`).join('')}
+                            <div class="w-8 h-8 rounded-full ${r.powerball_match ? 'bg-red-500' : 'bg-gray-300'} text-white flex items-center justify-center text-sm">${r.ticket.powerball}</div>
+                        </div>
+                        <div class="text-sm"><strong>${r.white_matches}+${r.powerball_match ? 'PB' : 'X'}</strong> = <span class="text-green-600 font-bold">${r.prize}</span></div>
+                    </div>
+                `).join('');
+            } else {
+                html += `<div class="text-red-600">No winners this time. Keep trying!</div>`;
+            }
+
+            document.getElementById('test-results-content').innerHTML = html;
+            document.getElementById('test-results').classList.remove('hidden');
+        }
+
+        // Load Analysis
+        async function loadAnalysis() {
+            const response = await fetch('/api/analysis');
+            analysisData = await response.json();
+
+            // Hot white balls
+            document.getElementById('hot-white').innerHTML = analysisData.hot_white.slice(0, 10).map(n => `
+                <div class="ball white-ball hot text-sm relative">
+                    ${n.number}
+                    <span class="absolute -bottom-4 text-xs text-gray-500">${n.count}</span>
+                </div>
+            `).join('');
+
+            // Cold white balls
+            document.getElementById('cold-white').innerHTML = analysisData.cold_white.slice(0, 10).map(n => `
+                <div class="ball white-ball cold text-sm relative">
+                    ${n.number}
+                    <span class="absolute -bottom-4 text-xs text-gray-500">${n.count}</span>
+                </div>
+            `).join('');
+
+            // Overdue
+            document.getElementById('overdue-white').innerHTML = analysisData.overdue_white.slice(0, 10).map(n => `
+                <div class="ball white-ball overdue text-sm relative" title="${n.gap} draws ago, ${n.ratio.toFixed(1)}x avg">
+                    ${n.number}
+                    <span class="absolute -bottom-4 text-xs text-purple-600">${n.ratio.toFixed(1)}x</span>
+                </div>
+            `).join('');
+
+            // Powerballs
+            document.getElementById('hot-pb').innerHTML = analysisData.hot_pb.slice(0, 5).map(n => `
+                <div class="ball powerball text-sm">${n.number}</div>
+            `).join('');
+
+            document.getElementById('cold-pb').innerHTML = analysisData.cold_pb.slice(0, 5).map(n => `
+                <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-700 flex items-center justify-center text-sm font-bold">${n.number}</div>
+            `).join('');
+
+            // Hot pairs
+            document.getElementById('hot-pairs').innerHTML = analysisData.hot_pairs.map(p => `
+                <div class="flex items-center gap-2 text-sm">
+                    <div class="ball white-ball w-8 h-8 text-xs">${p.pair[0]}</div>
+                    <span class="text-gray-400">&</span>
+                    <div class="ball white-ball w-8 h-8 text-xs">${p.pair[1]}</div>
+                    <span class="text-gray-500 ml-auto">${p.count} times</span>
+                </div>
+            `).join('');
+
+            // Patterns
+            const patterns = analysisData.patterns;
+            document.getElementById('patterns').innerHTML = `
+                <div>
+                    <h4 class="text-sm font-medium text-gray-600">Even/Odd Distribution</h4>
+                    ${patterns.even_odd.map(p => `<div class="text-sm">${p.evens} even, ${5-p.evens} odd: ${p.pct.toFixed(1)}%</div>`).join('')}
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-600">High/Low Distribution</h4>
+                    ${patterns.high_low.map(p => `<div class="text-sm">${p.highs} high, ${5-p.highs} low: ${p.pct.toFixed(1)}%</div>`).join('')}
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-600">Sum Statistics</h4>
+                    <div class="text-sm">Average: ${patterns.avg_sum.toFixed(0)}</div>
+                    <div class="text-sm">Range: ${patterns.sum_range[0]} - ${patterns.sum_range[1]}</div>
+                </div>
+            `;
+
+            // Load frequency chart
+            loadFrequencyChart();
+        }
+
+        async function loadFrequencyChart() {
+            const response = await fetch('/api/frequency-chart');
+            const data = await response.json();
+
+            const ctx = document.getElementById('frequencyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.white_balls.map(d => d.number),
+                    datasets: [{
+                        label: 'Actual Frequency',
+                        data: data.white_balls.map(d => d.count),
+                        backgroundColor: data.white_balls.map(d =>
+                            d.diff_pct > 5 ? 'rgba(249, 115, 22, 0.7)' :
+                            d.diff_pct < -5 ? 'rgba(59, 130, 246, 0.7)' :
+                            'rgba(156, 163, 175, 0.7)'
+                        ),
+                        borderWidth: 0
+                    }, {
+                        label: 'Expected (if random)',
+                        data: data.white_balls.map(d => d.expected),
+                        type: 'line',
+                        borderColor: 'rgba(220, 38, 38, 0.8)',
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const d = data.white_balls[context.dataIndex];
+                                    return `Count: ${d.count} (${d.diff_pct > 0 ? '+' : ''}${d.diff_pct.toFixed(1)}% vs expected)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Simulation
+        function fillRandomNumbers() {
+            for (let i = 1; i <= 5; i++) {
+                let num;
+                const existing = [];
+                for (let j = 1; j < i; j++) {
+                    existing.push(parseInt(document.getElementById(`sim-w${j}`).value));
+                }
+                do {
+                    num = Math.floor(Math.random() * 69) + 1;
+                } while (existing.includes(num));
+                document.getElementById(`sim-w${i}`).value = num;
+            }
+            document.getElementById('sim-pb').value = Math.floor(Math.random() * 26) + 1;
+        }
+
+        async function runSimulation() {
+            const whiteBalls = [];
+            for (let i = 1; i <= 5; i++) {
+                const val = parseInt(document.getElementById(`sim-w${i}`).value);
+                if (isNaN(val) || val < 1 || val > 69) {
+                    alert('Please enter valid white ball numbers (1-69)');
+                    return;
+                }
+                whiteBalls.push(val);
+            }
+
+            const pb = parseInt(document.getElementById('sim-pb').value);
+            if (isNaN(pb) || pb < 1 || pb > 26) {
+                alert('Please enter valid Powerball (1-26)');
+                return;
+            }
+
+            const maxAttempts = parseInt(document.getElementById('sim-max').value);
+
+            document.getElementById('sim-button').disabled = true;
+            document.getElementById('sim-button').textContent = 'Simulating...';
+            document.getElementById('sim-results').innerHTML = '<p class="text-gray-500">Running simulation... This may take a while.</p>';
+
+            try {
+                const response = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        white_balls: whiteBalls,
+                        powerball: pb,
+                        max_attempts: maxAttempts
+                    })
+                });
+
+                const data = await response.json();
+
+                let html = '';
+                if (data.hit_jackpot) {
+                    html = `
+                        <div class="p-4 bg-green-100 rounded-lg mb-4">
+                            <div class="text-2xl font-bold text-green-700">JACKPOT HIT!</div>
+                            <div class="text-green-600">After ${data.attempts.toLocaleString()} attempts</div>
+                        </div>
+                        <div class="space-y-2">
+                            <div><strong>Cost:</strong> $${data.cost.toLocaleString()}</div>
+                            <div><strong>Theoretical odds:</strong> 1 in ${data.theoretical_odds.toLocaleString()}</div>
+                            <div><strong>Your result:</strong> ${(data.vs_expected * 100).toFixed(4)}% of expected attempts</div>
+                            <div class="text-sm text-gray-600 mt-2">
+                                ${data.vs_expected < 1 ? 'Lucky! Fewer attempts than expected.' : 'More attempts than expected.'}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html = `
+                        <div class="p-4 bg-red-100 rounded-lg mb-4">
+                            <div class="text-xl font-bold text-red-700">No Jackpot</div>
+                            <div class="text-red-600">After ${data.attempts.toLocaleString()} attempts</div>
+                        </div>
+                        <div class="space-y-2">
+                            <div><strong>Cost would be:</strong> $${data.cost.toLocaleString()}</div>
+                            <div><strong>Theoretical odds:</strong> 1 in ${data.theoretical_odds.toLocaleString()}</div>
+                            <div class="text-sm text-gray-600 mt-2">
+                                Even after ${data.attempts.toLocaleString()} draws, no jackpot.
+                                The odds are truly astronomical!
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (data.partial_matches && Object.keys(data.partial_matches).length > 0) {
+                    html += `
+                        <div class="mt-4 pt-4 border-t">
+                            <h4 class="font-medium mb-2">Partial Matches:</h4>
+                            <div class="text-sm space-y-1">
+                                ${Object.entries(data.partial_matches)
+                                    .sort((a, b) => b[1] - a[1])
+                                    .slice(0, 10)
+                                    .map(([match, count]) => `<div>${match}: ${count.toLocaleString()}</div>`)
+                                    .join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('sim-results').innerHTML = html;
+            } catch (e) {
+                document.getElementById('sim-results').innerHTML = `<p class="text-red-600">Error: ${e.message}</p>`;
+            } finally {
+                document.getElementById('sim-button').disabled = false;
+                document.getElementById('sim-button').textContent = 'Run Simulation';
+            }
+        }
+
+        // Load History
+        async function loadHistory() {
+            const response = await fetch('/api/recent-draws?count=30');
+            const draws = await response.json();
+
+            document.getElementById('history-container').innerHTML = draws.map(d => `
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <span class="text-gray-600 w-24">${d.date}</span>
+                    ${d.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}
+                    <div class="ball powerball text-sm">${d.powerball}</div>
+                    <span class="ml-auto text-sm text-gray-500">${d.multiplier}x</span>
+                </div>
+            `).join('');
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pre-fill simulation with random numbers
+            fillRandomNumbers();
+        });
+    </script>
+</body>
+</html>
