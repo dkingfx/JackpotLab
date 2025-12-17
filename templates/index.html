@@ -283,7 +283,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-gradient-to-r from-blue-800 to-red-700 text-white py-6 shadow-lg">
         <div class="container mx-auto px-4">
@@ -298,11 +298,11 @@
             <div class="mt-4 flex gap-6 text-sm">
                 <div>
                     <span class="text-blue-200">Historical Draws:</span>
-                    <span class="font-bold">{{ total_draws }}</span>
+                    <span class="font-bold">{{ total_draws | default('1,876') }}</span>
                 </div>
                 <div>
                     <span class="text-blue-200">Jackpot Odds:</span>
-                    <span class="font-bold">1 in {{ jackpot_odds }}</span>
+                    <span class="font-bold">1 in {{ jackpot_odds | default('292,201,338') }}</span>
                 </div>
                 {% if latest_draw %}
                 <div>
@@ -315,7 +315,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 py-8 flex-grow">
         <!-- Tabs -->
         <nav class="tab-nav">
             <button onclick="showTab('generator')" id="tab-generator" class="tab-btn tab-active">
@@ -481,54 +481,84 @@
 
         <!-- Simulator Tab -->
         <div id="content-simulator" class="tab-content hidden">
-            <div class="grid md:grid-cols-2 gap-6">
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Controls -->
                 <div class="stat-card">
-                    <h2 class="text-xl font-bold mb-4">Jackpot Simulator</h2>
+                    <h2 class="text-xl font-bold mb-4">Budget Simulator</h2>
                     <p class="text-gray-600 mb-4">
-                        Enter your numbers and see how many draws it takes to hit the jackpot.
-                        This demonstrates the astronomical odds of winning.
+                        See how your ticket budget would perform against a recent drawing.
+                        Test your strategy's profit/loss potential!
                     </p>
 
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">White Balls (5 numbers, 1-69)</label>
-                        <div class="flex gap-2">
-                            <input type="number" id="sim-w1" class="w-16 border rounded px-2 py-1" min="1" max="69">
-                            <input type="number" id="sim-w2" class="w-16 border rounded px-2 py-1" min="1" max="69">
-                            <input type="number" id="sim-w3" class="w-16 border rounded px-2 py-1" min="1" max="69">
-                            <input type="number" id="sim-w4" class="w-16 border rounded px-2 py-1" min="1" max="69">
-                            <input type="number" id="sim-w5" class="w-16 border rounded px-2 py-1" min="1" max="69">
-                        </div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Budget ($)</label>
+                        <input type="number" id="sim-budget" value="100" min="2" max="10000"
+                               class="w-full border rounded-lg px-4 py-2"
+                               oninput="updateTicketCount()">
+                        <p class="text-xs text-gray-500 mt-1">
+                            <span id="sim-ticket-count">50</span> tickets @ $2 each
+                        </p>
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Powerball (1-26)</label>
-                        <input type="number" id="sim-pb" class="w-16 border rounded px-2 py-1" min="1" max="26">
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Attempts</label>
-                        <select id="sim-max" class="border rounded px-4 py-2">
-                            <option value="100000">100,000</option>
-                            <option value="1000000" selected>1,000,000</option>
-                            <option value="10000000">10,000,000</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Strategy</label>
+                        <select id="sim-strategy" class="w-full border rounded-lg px-4 py-2">
+                            <option value="mixed">Mixed (All Strategies)</option>
+                            <option value="importance">Importance Sampling</option>
+                            <option value="frequency">Frequency Weighted</option>
+                            <option value="hybrid">Hybrid</option>
+                            <option value="random">Pure Random</option>
                         </select>
                     </div>
 
-                    <button onclick="fillRandomNumbers()"
-                            class="w-full mb-2 bg-gray-200 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-300 transition">
-                        Fill Random Numbers
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Test Against Drawing</label>
+                        <select id="sim-draw" class="w-full border rounded-lg px-4 py-2">
+                            <option value="0">Most Recent</option>
+                            <option value="1">2nd Most Recent</option>
+                            <option value="2">3rd Most Recent</option>
+                            <option value="3">4th Most Recent</option>
+                            <option value="4">5th Most Recent</option>
+                        </select>
+                    </div>
+
+                    <button onclick="runBudgetSimulation()" id="sim-button"
+                            class="w-full bg-gradient-to-r from-blue-600 to-red-600 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-red-700 transition">
+                        Simulate Purchase
                     </button>
 
-                    <button onclick="runSimulation()" id="sim-button"
-                            class="w-full bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition">
-                        Run Simulation
-                    </button>
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
+                        <strong>Prize Tiers:</strong>
+                        <ul class="mt-1 space-y-0.5">
+                            <li>5+PB: Jackpot (~$200M)</li>
+                            <li>5+0: $1,000,000</li>
+                            <li>4+PB: $50,000</li>
+                            <li>4+0: $100</li>
+                            <li>3+PB: $100</li>
+                            <li>3+0: $7</li>
+                            <li>2+PB: $7</li>
+                            <li>1+PB: $4</li>
+                            <li>0+PB: $4</li>
+                        </ul>
+                    </div>
                 </div>
 
-                <div class="stat-card">
+                <!-- Results Summary -->
+                <div class="stat-card md:col-span-2">
                     <h3 class="text-lg font-bold mb-4">Simulation Results</h3>
                     <div id="sim-results">
-                        <p class="text-gray-500">Run a simulation to see results</p>
+                        <div class="text-center py-12 text-gray-400">
+                            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <p>Run a simulation to see your profit/loss</p>
+                        </div>
+                    </div>
+
+                    <!-- Simulated Tickets -->
+                    <div id="sim-tickets" class="mt-6 hidden">
+                        <h4 class="font-bold mb-3 border-t pt-4">Sample Tickets</h4>
+                        <div id="sim-tickets-container" class="tickets-grid max-h-96"></div>
                     </div>
                 </div>
             </div>
@@ -544,7 +574,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+    <footer class="bg-gray-800 text-gray-400 py-8 mt-auto">
         <div class="container mx-auto px-4 text-center">
             <div class="flex items-center justify-center gap-2 mb-4">
                 <span class="text-2xl">🎰</span>
@@ -686,39 +716,91 @@
                 return;
             }
 
-            const response = await fetch('/api/test-draw', {
+            // Use the simulate API with the current ticket count
+            const budget = currentTickets.length * 2;
+            const strategy = document.getElementById('strategy').value;
+
+            const response = await fetch('/api/simulate', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({tickets: currentTickets})
+                body: JSON.stringify({ budget, strategy, draw_index: 0 })
             });
 
             const data = await response.json();
-
-            const winners = data.results.filter(r => r.prize !== 'No prize');
+            const summary = data.summary;
+            const isProfit = summary.profit_loss >= 0;
 
             let html = `
                 <div class="mb-3 p-3 bg-blue-50 rounded-lg">
-                    <strong>Tested against:</strong> ${data.draw.date}<br>
+                    <strong>Tested against:</strong> ${data.target_draw.date}<br>
                     <div class="flex gap-2 mt-2">
-                        ${data.draw.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}
-                        <div class="ball powerball text-sm">${data.draw.powerball}</div>
+                        ${data.target_draw.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}
+                        <div class="ball powerball text-sm">${data.target_draw.powerball}</div>
                     </div>
+                </div>
+
+                <!-- Profit/Loss Summary -->
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="text-center p-3 bg-gray-100 rounded-lg">
+                        <div class="text-xl font-bold text-gray-800">$${summary.total_spent.toLocaleString()}</div>
+                        <div class="text-xs text-gray-500">Spent</div>
+                    </div>
+                    <div class="text-center p-3 bg-gray-100 rounded-lg">
+                        <div class="text-xl font-bold ${summary.total_won > 0 ? 'text-green-600' : 'text-gray-400'}">$${summary.total_won.toLocaleString()}</div>
+                        <div class="text-xs text-gray-500">Won</div>
+                    </div>
+                    <div class="text-center p-3 ${isProfit ? 'bg-green-100' : 'bg-red-100'} rounded-lg">
+                        <div class="text-xl font-bold ${isProfit ? 'text-green-600' : 'text-red-600'}">
+                            ${isProfit ? '+' : '-'}$${Math.abs(summary.profit_loss).toLocaleString()}
+                        </div>
+                        <div class="text-xs ${isProfit ? 'text-green-600' : 'text-red-600'}">${isProfit ? 'Profit' : 'Loss'}</div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mb-3 p-2 ${summary.roi >= 0 ? 'bg-green-50' : 'bg-red-50'} rounded">
+                    <span class="text-sm font-medium">ROI</span>
+                    <span class="font-bold ${summary.roi >= 0 ? 'text-green-600' : 'text-red-600'}">${summary.roi >= 0 ? '+' : ''}${summary.roi}%</span>
                 </div>
             `;
 
-            if (winners.length > 0) {
-                html += `<div class="text-green-600 font-bold mb-2">Winners: ${winners.length}</div>`;
-                html += winners.map(r => `
-                    <div class="p-2 bg-green-50 rounded mb-2">
-                        <div class="flex gap-1 mb-1">
-                            ${r.ticket.white_balls.map(n => `<div class="w-8 h-8 rounded-full ${data.draw.white_balls.includes(n) ? 'bg-green-500 text-white' : 'bg-gray-200'} flex items-center justify-center text-sm">${n}</div>`).join('')}
-                            <div class="w-8 h-8 rounded-full ${r.powerball_match ? 'bg-red-500' : 'bg-gray-300'} text-white flex items-center justify-center text-sm">${r.ticket.powerball}</div>
-                        </div>
-                        <div class="text-sm"><strong>${r.white_matches}+${r.powerball_match ? 'PB' : 'X'}</strong> = <span class="text-green-600 font-bold">${r.prize}</span></div>
-                    </div>
-                `).join('');
+            if (summary.winners > 0) {
+                html += `<div class="text-green-600 font-bold mb-2">Winners: ${summary.winners}</div>`;
+
+                // Show prize breakdown
+                if (Object.keys(summary.by_tier).length > 0) {
+                    html += `<div class="space-y-1 mb-3">`;
+                    Object.entries(summary.by_tier)
+                        .filter(([tier, count]) => tier !== 'No Win')
+                        .sort((a, b) => getPrizeTierOrder(a[0]) - getPrizeTierOrder(b[0]))
+                        .forEach(([tier, count]) => {
+                            html += `
+                                <div class="flex justify-between text-sm p-2 bg-green-50 rounded">
+                                    <span>${tier}</span>
+                                    <span class="text-green-600 font-medium">${count}x = $${(getPrizeValue(tier) * count).toLocaleString()}</span>
+                                </div>
+                            `;
+                        });
+                    html += `</div>`;
+                }
+
+                // Show sample winning tickets
+                const winningTickets = data.tickets.filter(t => t.prize > 0).slice(0, 5);
+                if (winningTickets.length > 0) {
+                    html += `<div class="text-sm font-medium mb-2">Sample Winners:</div>`;
+                    winningTickets.forEach(t => {
+                        html += `
+                            <div class="p-2 bg-green-50 rounded mb-2">
+                                <div class="flex gap-1 mb-1">
+                                    ${t.white_balls.map(n => `<div class="w-8 h-8 rounded-full ${t.matched_whites.includes(n) ? 'bg-green-500 text-white' : 'bg-gray-200'} flex items-center justify-center text-sm">${n}</div>`).join('')}
+                                    <div class="w-8 h-8 rounded-full ${t.powerball_match ? 'bg-red-500' : 'bg-gray-300'} text-white flex items-center justify-center text-sm">${t.powerball}</div>
+                                </div>
+                                <div class="text-sm"><strong>${t.tier}</strong> = <span class="text-green-600 font-bold">+$${t.prize.toLocaleString()}</span></div>
+                            </div>
+                        `;
+                    });
+                }
             } else {
-                html += `<div class="text-red-600">No winners this time. Keep trying!</div>`;
+                html += `<div class="text-red-600">No winners this time. The expected ROI is -${(100 - (1/292201338 * 100)).toFixed(2)}%</div>`;
             }
 
             document.getElementById('test-results-content').innerHTML = html;
@@ -843,113 +925,148 @@
             });
         }
 
-        // Simulation
-        function fillRandomNumbers() {
-            for (let i = 1; i <= 5; i++) {
-                let num;
-                const existing = [];
-                for (let j = 1; j < i; j++) {
-                    existing.push(parseInt(document.getElementById(`sim-w${j}`).value));
-                }
-                do {
-                    num = Math.floor(Math.random() * 69) + 1;
-                } while (existing.includes(num));
-                document.getElementById(`sim-w${i}`).value = num;
-            }
-            document.getElementById('sim-pb').value = Math.floor(Math.random() * 26) + 1;
+        // Budget Simulator
+        function updateTicketCount() {
+            const budget = parseInt(document.getElementById('sim-budget').value) || 0;
+            document.getElementById('sim-ticket-count').textContent = Math.floor(budget / 2);
         }
 
-        async function runSimulation() {
-            const whiteBalls = [];
-            for (let i = 1; i <= 5; i++) {
-                const val = parseInt(document.getElementById(`sim-w${i}`).value);
-                if (isNaN(val) || val < 1 || val > 69) {
-                    alert('Please enter valid white ball numbers (1-69)');
-                    return;
-                }
-                whiteBalls.push(val);
-            }
+        async function runBudgetSimulation() {
+            const budget = parseInt(document.getElementById('sim-budget').value);
+            const strategy = document.getElementById('sim-strategy').value;
+            const drawIndex = parseInt(document.getElementById('sim-draw').value);
 
-            const pb = parseInt(document.getElementById('sim-pb').value);
-            if (isNaN(pb) || pb < 1 || pb > 26) {
-                alert('Please enter valid Powerball (1-26)');
+            if (budget < 2) {
+                alert('Minimum budget is $2');
                 return;
             }
 
-            const maxAttempts = parseInt(document.getElementById('sim-max').value);
-
             document.getElementById('sim-button').disabled = true;
             document.getElementById('sim-button').textContent = 'Simulating...';
-            document.getElementById('sim-results').innerHTML = '<p class="text-gray-500">Running simulation... This may take a while.</p>';
 
             try {
                 const response = await fetch('/api/simulate', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        white_balls: whiteBalls,
-                        powerball: pb,
-                        max_attempts: maxAttempts
-                    })
+                    body: JSON.stringify({ budget, strategy, draw_index: drawIndex })
                 });
 
                 const data = await response.json();
-
-                let html = '';
-                if (data.hit_jackpot) {
-                    html = `
-                        <div class="p-4 bg-green-100 rounded-lg mb-4">
-                            <div class="text-2xl font-bold text-green-700">JACKPOT HIT!</div>
-                            <div class="text-green-600">After ${data.attempts.toLocaleString()} attempts</div>
-                        </div>
-                        <div class="space-y-2">
-                            <div><strong>Cost:</strong> $${data.cost.toLocaleString()}</div>
-                            <div><strong>Theoretical odds:</strong> 1 in ${data.theoretical_odds.toLocaleString()}</div>
-                            <div><strong>Your result:</strong> ${(data.vs_expected * 100).toFixed(4)}% of expected attempts</div>
-                            <div class="text-sm text-gray-600 mt-2">
-                                ${data.vs_expected < 1 ? 'Lucky! Fewer attempts than expected.' : 'More attempts than expected.'}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    html = `
-                        <div class="p-4 bg-red-100 rounded-lg mb-4">
-                            <div class="text-xl font-bold text-red-700">No Jackpot</div>
-                            <div class="text-red-600">After ${data.attempts.toLocaleString()} attempts</div>
-                        </div>
-                        <div class="space-y-2">
-                            <div><strong>Cost would be:</strong> $${data.cost.toLocaleString()}</div>
-                            <div><strong>Theoretical odds:</strong> 1 in ${data.theoretical_odds.toLocaleString()}</div>
-                            <div class="text-sm text-gray-600 mt-2">
-                                Even after ${data.attempts.toLocaleString()} draws, no jackpot.
-                                The odds are truly astronomical!
-                            </div>
-                        </div>
-                    `;
-                }
-
-                if (data.partial_matches && Object.keys(data.partial_matches).length > 0) {
-                    html += `
-                        <div class="mt-4 pt-4 border-t">
-                            <h4 class="font-medium mb-2">Partial Matches:</h4>
-                            <div class="text-sm space-y-1">
-                                ${Object.entries(data.partial_matches)
-                                    .sort((a, b) => b[1] - a[1])
-                                    .slice(0, 10)
-                                    .map(([match, count]) => `<div>${match}: ${count.toLocaleString()}</div>`)
-                                    .join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                document.getElementById('sim-results').innerHTML = html;
+                displaySimulationResults(data);
             } catch (e) {
                 document.getElementById('sim-results').innerHTML = `<p class="text-red-600">Error: ${e.message}</p>`;
             } finally {
                 document.getElementById('sim-button').disabled = false;
-                document.getElementById('sim-button').textContent = 'Run Simulation';
+                document.getElementById('sim-button').textContent = 'Simulate Purchase';
             }
+        }
+
+        function displaySimulationResults(data) {
+            const summary = data.summary;
+            const isProfit = summary.profit_loss >= 0;
+
+            let html = `
+                <!-- Target Draw -->
+                <div class="mb-4 p-4 bg-blue-50 rounded-lg">
+                    <div class="text-sm text-gray-600 mb-2">Tested Against Drawing:</div>
+                    <div class="font-bold text-lg mb-2">${data.target_draw.date}</div>
+                    <div class="flex gap-2 items-center">
+                        ${data.target_draw.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}
+                        <div class="ball powerball text-sm">${data.target_draw.powerball}</div>
+                        <span class="ml-2 text-sm text-gray-500">${data.target_draw.multiplier}x</span>
+                    </div>
+                </div>
+
+                <!-- Profit/Loss Summary -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="text-center p-4 bg-gray-100 rounded-lg">
+                        <div class="text-2xl font-bold text-gray-800">$${summary.total_spent.toLocaleString()}</div>
+                        <div class="text-sm text-gray-500">Spent</div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-100 rounded-lg">
+                        <div class="text-2xl font-bold ${summary.total_won > 0 ? 'text-green-600' : 'text-gray-400'}">$${summary.total_won.toLocaleString()}</div>
+                        <div class="text-sm text-gray-500">Won</div>
+                    </div>
+                    <div class="text-center p-4 ${isProfit ? 'bg-green-100' : 'bg-red-100'} rounded-lg">
+                        <div class="text-2xl font-bold ${isProfit ? 'text-green-600' : 'text-red-600'}">
+                            ${isProfit ? '+' : '-'}$${Math.abs(summary.profit_loss).toLocaleString()}
+                        </div>
+                        <div class="text-sm ${isProfit ? 'text-green-600' : 'text-red-600'}">${isProfit ? 'Profit' : 'Loss'}</div>
+                    </div>
+                </div>
+
+                <!-- ROI -->
+                <div class="mb-4 p-3 ${summary.roi >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium">Return on Investment (ROI)</span>
+                        <span class="text-xl font-bold ${summary.roi >= 0 ? 'text-green-600' : 'text-red-600'}">${summary.roi >= 0 ? '+' : ''}${summary.roi}%</span>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <div class="text-lg font-bold">${summary.ticket_count.toLocaleString()}</div>
+                        <div class="text-sm text-gray-500">Tickets Purchased</div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <div class="text-lg font-bold ${summary.winners > 0 ? 'text-green-600' : 'text-gray-400'}">${summary.winners.toLocaleString()}</div>
+                        <div class="text-sm text-gray-500">Winning Tickets</div>
+                    </div>
+                </div>
+
+                <!-- Prize Breakdown -->
+                ${Object.keys(summary.by_tier).length > 0 ? `
+                <div class="mt-4">
+                    <h4 class="font-medium mb-2">Prize Breakdown:</h4>
+                    <div class="space-y-1">
+                        ${Object.entries(summary.by_tier)
+                            .filter(([tier, count]) => tier !== 'No Win')
+                            .sort((a, b) => getPrizeTierOrder(a[0]) - getPrizeTierOrder(b[0]))
+                            .map(([tier, count]) => `
+                                <div class="flex justify-between items-center text-sm p-2 bg-green-50 rounded">
+                                    <span class="font-medium">${tier}</span>
+                                    <span class="text-green-600">${count}x = $${(getPrizeValue(tier) * count).toLocaleString()}</span>
+                                </div>
+                            `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+            `;
+
+            document.getElementById('sim-results').innerHTML = html;
+
+            // Show sample tickets
+            if (data.tickets && data.tickets.length > 0) {
+                document.getElementById('sim-tickets').classList.remove('hidden');
+                document.getElementById('sim-tickets-container').innerHTML = data.tickets.slice(0, 20).map((t, i) => `
+                    <div class="ticket-card ${t.prize > 0 ? 'has-match' : ''}">
+                        <div class="ticket-number">TICKET #${String(i+1).padStart(3, '0')}</div>
+                        <div class="ticket-balls">
+                            ${t.white_balls.map(n => `<div class="ticket-ball white ${t.matched_whites.includes(n) ? 'ring-2 ring-green-400' : ''}">${n}</div>`).join('')}
+                            <div class="ticket-ball red ${t.powerball_match ? 'ring-2 ring-green-400' : ''}">${t.powerball}</div>
+                        </div>
+                        <div class="ticket-divider"></div>
+                        <div class="ticket-footer">
+                            <span class="ticket-strategy ${getStrategyClass(t.strategy)}">${formatStrategy(t.strategy)}</span>
+                            ${t.prize > 0 ? `<span class="text-green-400 font-bold">+$${t.prize.toLocaleString()}</span>` : '<span class="ticket-price text-red-400">-$2</span>'}
+                        </div>
+                        ${t.prize > 0 ? `<div class="text-center text-xs text-green-400 mt-2">${t.tier} Winner!</div>` : ''}
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('sim-tickets').classList.add('hidden');
+            }
+        }
+
+        function getPrizeTierOrder(tier) {
+            const order = {'5+PB': 0, '5+0': 1, '4+PB': 2, '4+0': 3, '3+PB': 4, '3+0': 5, '2+PB': 6, '1+PB': 7, '0+PB': 8};
+            return order[tier] || 99;
+        }
+
+        function getPrizeValue(tier) {
+            const prizes = {'5+PB': 200000000, '5+0': 1000000, '4+PB': 50000, '4+0': 100, '3+PB': 100, '3+0': 7, '2+PB': 7, '1+PB': 4, '0+PB': 4};
+            return prizes[tier] || 0;
         }
 
         // Load History
