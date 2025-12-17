@@ -696,8 +696,10 @@
             justify-content: space-between;
             gap: 16px;
             flex-shrink: 0;
-            position: sticky;
+            position: fixed;
             bottom: 0;
+            left: 0;
+            right: 0;
             z-index: 40;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
@@ -783,20 +785,90 @@
         @media (max-width: 768px) {
             .mobile-nav-toggle {
                 display: inline-flex;
+                max-width: 280px;
+                margin: 0 auto 8px auto;
+                padding: 8px 12px;
+                font-size: 13px;
             }
             .tab-nav {
                 display: none;
+            }
+            .mobile-nav {
+                max-width: 280px;
+                margin: 0 auto 8px auto;
+            }
+            .mobile-nav button {
+                font-size: 13px;
+                padding: 8px 12px;
             }
         }
 
         @media (max-width: 640px) {
             .action-footer {
                 flex-direction: column;
-                gap: 12px;
-                padding: 12px 16px;
+                gap: 8px;
+                padding: 10px 16px;
             }
             .action-btn {
                 width: 100%;
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+            .action-btn.secondary {
+                width: auto;
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+            .backtest-group {
+                width: 100%;
+                justify-content: center;
+                padding: 8px 12px;
+                gap: 6px;
+            }
+            .action-select {
+                padding: 6px 10px;
+                font-size: 12px;
+                min-width: 80px;
+            }
+            .action-label {
+                font-size: 11px;
+            }
+            /* Mobile form elements */
+            .stat-card {
+                padding: 12px;
+                width: 100% !important;
+                max-width: 300px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .stat-card h2 {
+                font-size: 18px;
+                margin-bottom: 12px;
+                text-align: center;
+            }
+            .stat-card label {
+                font-size: 13px;
+            }
+            .stat-card input[type="number"] {
+                font-size: 16px;
+                padding: 12px 14px;
+                min-height: 48px;
+                touch-action: manipulation;
+                -webkit-user-select: text;
+                user-select: text;
+            }
+            .stat-card select {
+                font-size: 16px;
+                padding: 12px 14px;
+                min-height: 48px;
+            }
+            .stat-card .text-xs {
+                font-size: 11px;
+            }
+            /* Hide ticket count badges on mobile - info is in footer */
+            #tickets-count,
+            #tickets-tier-breakdown {
+                display: none;
             }
         }
 
@@ -916,9 +988,17 @@
                 border: 1px solid #e5e7eb;
             }
         }
+
+        /* Tab content fill available space */
+        .tab-content:not(.hidden) {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col overflow-x-hidden">
+<body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
     <!-- Header -->
     <header class="bg-gradient-to-r from-blue-800 to-red-700 text-white py-3 shadow-lg sticky top-0 z-50 flex-shrink-0">
         <div class="w-full px-4">
@@ -968,7 +1048,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="w-full px-4 py-4 flex-1">
+    <main class="w-full px-4 py-4 flex-1 pb-20 min-h-0 overflow-hidden flex flex-col">
         <!-- Mobile Nav Toggle -->
         <button
             type="button"
@@ -980,16 +1060,19 @@
                     <span class="hamburger-line"></span>
                     <span class="hamburger-line"></span>
                 </span>
-                <span class="font-medium">Menu</span>
+                <span id="mobile-current-tab" class="font-medium">Generate Tickets</span>
             </div>
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
         </button>
 
-        <div id="mobile-nav" class="mobile-nav hidden mb-2 md:hidden bg-white border border-gray-200 rounded-lg shadow-sm">
-            <button onclick="showTab('generator')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Generate Tickets</button>
-            <button onclick="showTab('tickets')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Tickets</button>
-            <button onclick="showTab('analysis')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Analysis</button>
-            <button onclick="showTab('simulator')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Jackpot Simulator</button>
-            <button onclick="showTab('history')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Recent Draws</button>
+        <div id="mobile-nav" class="mobile-nav hidden mb-2 md:hidden bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+            <button id="mobile-tab-generator" onclick="showTab('generator')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 bg-blue-50 text-blue-700 font-medium">Generate Tickets</button>
+            <button id="mobile-tab-tickets" onclick="showTab('tickets')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Tickets</button>
+            <button id="mobile-tab-analysis" onclick="showTab('analysis')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Analysis</button>
+            <button id="mobile-tab-simulator" onclick="showTab('simulator')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Jackpot Simulator</button>
+            <button id="mobile-tab-history" onclick="showTab('history')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Recent Draws</button>
         </div>
 
         <!-- Tabs -->
@@ -1013,6 +1096,7 @@
 
         <!-- Generator Tab -->
         <div id="content-generator" class="tab-content">
+            <div class="flex-1 overflow-y-auto">
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- Controls -->
                 <div class="stat-card w-64 flex-shrink-0">
@@ -1024,7 +1108,8 @@
                         </label>
                         <input type="number" id="ticket-count" value="1" min="1" max="20000"
                                class="w-full border rounded-lg px-4 py-2"
-                               oninput="handleTicketInput(this)">
+                               oninput="handleTicketInput(this)"
+                               onblur="validateTicketInput(this)">
                     </div>
 
                     <div class="mb-4">
@@ -1108,10 +1193,12 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
 
         <!-- Tickets Tab (Printable List View) -->
         <div id="content-tickets" class="tab-content hidden">
+            <div class="flex-1 overflow-y-auto">
             <div class="stat-card">
                 <div class="flex justify-between items-center mb-4">
                     <div>
@@ -1138,10 +1225,12 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
 
         <!-- Analysis Tab -->
         <div id="content-analysis" class="tab-content hidden">
+            <div class="flex-1 overflow-y-auto">
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Hot White Balls -->
                 <div class="stat-card">
@@ -1203,10 +1292,12 @@
                 <h3 class="text-lg font-bold mb-4">Number Frequency Distribution</h3>
                 <canvas id="frequencyChart" height="100"></canvas>
             </div>
+            </div>
         </div>
 
         <!-- Simulator Tab -->
         <div id="content-simulator" class="tab-content hidden">
+            <div class="flex-1 overflow-y-auto">
             <div class="grid md:grid-cols-3 gap-6">
                 <!-- Controls -->
                 <div class="stat-card">
@@ -1269,8 +1360,53 @@
                     </div>
                 </div>
 
+                <!-- Test Your Numbers -->
+                <div class="stat-card">
+                    <h2 class="text-xl font-bold mb-4">Test Your Numbers</h2>
+                    <p class="text-gray-600 mb-4 text-sm">
+                        Enter your lucky numbers and see how they would have performed against recent drawings.
+                    </p>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">White Balls (1-69)</label>
+                        <div class="grid grid-cols-5 gap-2">
+                            <input type="number" id="user-white-1" min="1" max="69" placeholder="1" class="w-full border rounded-lg px-2 py-2 text-center">
+                            <input type="number" id="user-white-2" min="1" max="69" placeholder="2" class="w-full border rounded-lg px-2 py-2 text-center">
+                            <input type="number" id="user-white-3" min="1" max="69" placeholder="3" class="w-full border rounded-lg px-2 py-2 text-center">
+                            <input type="number" id="user-white-4" min="1" max="69" placeholder="4" class="w-full border rounded-lg px-2 py-2 text-center">
+                            <input type="number" id="user-white-5" min="1" max="69" placeholder="5" class="w-full border rounded-lg px-2 py-2 text-center">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Powerball (1-26)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="user-powerball" min="1" max="26" placeholder="PB" class="w-20 border rounded-lg px-2 py-2 text-center border-red-300 bg-red-50">
+                            <span class="text-xs text-gray-500">Red ball</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Test Against</label>
+                        <select id="user-num-draws" class="w-full border rounded-lg px-4 py-2">
+                            <option value="10">Last 10 drawings</option>
+                            <option value="25">Last 25 drawings</option>
+                            <option value="50" selected>Last 50 drawings</option>
+                            <option value="100">Last 100 drawings</option>
+                            <option value="200">Last 200 drawings</option>
+                        </select>
+                    </div>
+
+                    <button onclick="testUserNumbers()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-bold hover:from-purple-700 hover:to-pink-700 transition">
+                        Test My Numbers
+                    </button>
+
+                    <div id="user-numbers-results" class="mt-4 hidden">
+                    </div>
+                </div>
+
                 <!-- Results Summary -->
-                <div class="stat-card md:col-span-2">
+                <div class="stat-card md:col-span-3">
                     <h3 class="text-lg font-bold mb-4">Simulation Results</h3>
                     <div id="sim-results">
                         <div class="text-center py-12 text-gray-400">
@@ -1288,13 +1424,24 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
 
         <!-- History Tab -->
         <div id="content-history" class="tab-content hidden">
-            <div class="stat-card">
-                <h2 class="text-xl font-bold mb-4">Recent Winning Numbers</h2>
-                <div id="history-container" class="space-y-3"></div>
+            <div class="stat-card flex flex-col flex-1 min-h-0">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold">Recent Winning Numbers</h2>
+                    <select id="history-year-select" onchange="filterHistoryByYear()" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="all">All Years</option>
+                    </select>
+                </div>
+                <div id="history-container" class="space-y-3 overflow-y-auto pr-2 flex-1"></div>
             </div>
         </div>
     </main>
@@ -1343,6 +1490,14 @@
         }
 
         // Tab Management
+        const tabNames = {
+            'generator': 'Generate Tickets',
+            'tickets': 'Tickets',
+            'analysis': 'Analysis',
+            'simulator': 'Jackpot Simulator',
+            'history': 'Recent Draws'
+        };
+
         function showTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
@@ -1352,24 +1507,53 @@
             const mobileNav = document.getElementById('mobile-nav');
             if (mobileNav) mobileNav.classList.add('hidden');
 
+            // Update mobile current tab label
+            const mobileCurrentTab = document.getElementById('mobile-current-tab');
+            if (mobileCurrentTab) {
+                mobileCurrentTab.textContent = tabNames[tab] || tab;
+            }
+
+            // Update mobile nav button active states
+            document.querySelectorAll('[id^="mobile-tab-"]').forEach(btn => {
+                btn.classList.remove('bg-blue-50', 'text-blue-700', 'font-medium');
+            });
+            const activeMobileBtn = document.getElementById(`mobile-tab-${tab}`);
+            if (activeMobileBtn) {
+                activeMobileBtn.classList.add('bg-blue-50', 'text-blue-700', 'font-medium');
+            }
+
             if (tab === 'analysis' && !analysisData) loadAnalysis();
             if (tab === 'history') loadHistory();
         }
 
         function handleTicketInput(inputEl) {
-            let value = parseInt(inputEl.value || '0', 10);
-            if (isNaN(value) || value < 1) value = 1;
-            if (value > 20000) value = 20000;
-            inputEl.value = value;
+            // Allow empty input while typing - don't force a value
+            if (inputEl.value === '') {
+                document.getElementById('ticket-cost').textContent = '0';
+                return;
+            }
 
+            let value = parseInt(inputEl.value, 10);
+            if (isNaN(value)) return; // Don't interfere while typing
+
+            // Only clamp the value, don't set it (let user type freely)
             const costSpan = document.getElementById('ticket-cost');
-            if (costSpan) costSpan.textContent = (value * 2).toLocaleString();
+            if (costSpan) costSpan.textContent = (Math.min(Math.max(value, 0), 20000) * 2).toLocaleString();
 
             // Changing ticket count starts a fresh session spend
             totalGeneratedTickets = 0;
             totalGenerateClicks = 0;
             totalSessionCost = 0;
             updateSessionSummary();
+        }
+
+        function validateTicketInput(inputEl) {
+            // Called on blur - enforce min/max
+            let value = parseInt(inputEl.value || '1', 10);
+            if (isNaN(value) || value < 1) value = 1;
+            if (value > 20000) value = 20000;
+            inputEl.value = value;
+            handleTicketInput(inputEl);
         }
 
         function updateSessionSummary() {
@@ -1966,6 +2150,126 @@
             document.getElementById('sim-ticket-count').textContent = Math.floor(budget / 2);
         }
 
+        // Test User's Numbers
+        async function testUserNumbers() {
+            // Get user's numbers
+            const whiteBalls = [];
+            for (let i = 1; i <= 5; i++) {
+                const val = parseInt(document.getElementById(`user-white-${i}`).value);
+                if (isNaN(val) || val < 1 || val > 69) {
+                    alert(`White ball ${i} must be between 1 and 69`);
+                    return;
+                }
+                whiteBalls.push(val);
+            }
+
+            // Check for duplicates
+            if (new Set(whiteBalls).size !== 5) {
+                alert('White balls must be unique numbers');
+                return;
+            }
+
+            const powerball = parseInt(document.getElementById('user-powerball').value);
+            if (isNaN(powerball) || powerball < 1 || powerball > 26) {
+                alert('Powerball must be between 1 and 26');
+                return;
+            }
+
+            const numDraws = parseInt(document.getElementById('user-num-draws').value);
+
+            // Fetch recent draws
+            try {
+                const response = await fetch(`/api/recent-draws?count=${numDraws}`);
+                const draws = await response.json();
+
+                // Check matches
+                const prizeMap = {
+                    '5-true': { prize: 200000000, tier: '5+PB (Jackpot)' },
+                    '5-false': { prize: 1000000, tier: '5+0' },
+                    '4-true': { prize: 50000, tier: '4+PB' },
+                    '4-false': { prize: 100, tier: '4+0' },
+                    '3-true': { prize: 100, tier: '3+PB' },
+                    '3-false': { prize: 7, tier: '3+0' },
+                    '2-true': { prize: 7, tier: '2+PB' },
+                    '1-true': { prize: 4, tier: '1+PB' },
+                    '0-true': { prize: 4, tier: '0+PB' }
+                };
+
+                let totalWon = 0;
+                let winningDraws = [];
+                const userWhiteSet = new Set(whiteBalls);
+
+                draws.forEach(draw => {
+                    const drawWhiteSet = new Set(draw.white_balls);
+                    const whiteMatches = whiteBalls.filter(n => drawWhiteSet.has(n)).length;
+                    const pbMatch = powerball === draw.powerball;
+
+                    const key = `${whiteMatches}-${pbMatch}`;
+                    const result = prizeMap[key];
+
+                    if (result) {
+                        totalWon += result.prize;
+                        winningDraws.push({
+                            date: draw.date,
+                            white_balls: draw.white_balls,
+                            powerball: draw.powerball,
+                            whiteMatches,
+                            pbMatch,
+                            tier: result.tier,
+                            prize: result.prize
+                        });
+                    }
+                });
+
+                // Display results
+                const resultsDiv = document.getElementById('user-numbers-results');
+                resultsDiv.classList.remove('hidden');
+
+                const totalCost = numDraws * 2;
+                const profit = totalWon - totalCost;
+                const isProfit = profit >= 0;
+
+                let html = `
+                    <div class="p-3 ${isProfit ? 'bg-green-50' : 'bg-red-50'} rounded-lg mb-3">
+                        <div class="text-center">
+                            <div class="text-xs text-gray-500 mb-1">If played ${numDraws} times</div>
+                            <div class="text-2xl font-bold ${isProfit ? 'text-green-600' : 'text-red-600'}">
+                                ${isProfit ? '+' : '-'}$${Math.abs(profit).toLocaleString()}
+                            </div>
+                            <div class="text-xs text-gray-500">Cost: $${totalCost} | Won: $${totalWon.toLocaleString()}</div>
+                        </div>
+                    </div>
+                `;
+
+                if (winningDraws.length > 0) {
+                    html += `
+                        <div class="text-sm font-medium mb-2 text-green-600">${winningDraws.length} Winning Draw${winningDraws.length > 1 ? 's' : ''}!</div>
+                        <div class="space-y-2 max-h-48 overflow-y-auto">
+                            ${winningDraws.map(w => `
+                                <div class="p-2 bg-green-50 rounded border border-green-200 text-xs">
+                                    <div class="font-medium">${w.date} - ${w.tier}</div>
+                                    <div class="flex gap-1 mt-1">
+                                        ${w.white_balls.map(n => `
+                                            <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs ${userWhiteSet.has(n) ? 'bg-green-500 text-white' : 'bg-gray-200'}">${n}</span>
+                                        `).join('')}
+                                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs ${w.pbMatch ? 'bg-red-500 text-white' : 'bg-red-200'}">${w.powerball}</span>
+                                    </div>
+                                    <div class="mt-1 text-green-600 font-medium">+$${w.prize.toLocaleString()}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    html += `<div class="text-sm text-gray-500 text-center">No wins in the last ${numDraws} drawings</div>`;
+                }
+
+                resultsDiv.innerHTML = html;
+
+            } catch (e) {
+                alert('Error testing numbers: ' + e.message);
+            }
+        }
+
         async function runBudgetSimulation() {
             const budget = parseInt(document.getElementById('sim-budget').value);
             const strategy = document.getElementById('sim-strategy').value;
@@ -1983,7 +2287,7 @@
                 const response = await fetch('/api/simulate', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ budget, strategy, draw_index: drawIndex })
+                    body: JSON.stringify({ budget, strategy, num_draws: 1 })
                 });
 
                 const data = await response.json();
@@ -1999,16 +2303,16 @@
         function displaySimulationResults(data) {
             const summary = data.summary;
             const isProfit = summary.profit_loss >= 0;
+            const targetDraw = data.draws[0];  // Get the first draw from draws array
 
             let html = `
                 <!-- Target Draw -->
                 <div class="mb-4 p-4 bg-blue-50 rounded-lg">
                     <div class="text-sm text-gray-600 mb-2">Tested Against Drawing:</div>
-                    <div class="font-bold text-lg mb-2">${data.target_draw.date}</div>
+                    <div class="font-bold text-lg mb-2">${targetDraw.date}</div>
                     <div class="flex gap-2 items-center">
-                        ${data.target_draw.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}
-                        <div class="ball powerball text-sm">${data.target_draw.powerball}</div>
-                        <span class="ml-2 text-sm text-gray-500">${data.target_draw.multiplier}x</span>
+                        ${targetDraw.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}
+                        <div class="ball powerball text-sm">${targetDraw.powerball}</div>
                     </div>
                 </div>
 
@@ -2045,7 +2349,7 @@
                         <div class="text-sm text-gray-500">Tickets Purchased</div>
                     </div>
                     <div class="p-3 bg-gray-50 rounded-lg">
-                        <div class="text-lg font-bold ${summary.winners > 0 ? 'text-green-600' : 'text-gray-400'}">${summary.winners.toLocaleString()}</div>
+                        <div class="text-lg font-bold ${targetDraw.winners > 0 ? 'text-green-600' : 'text-gray-400'}">${targetDraw.winners.toLocaleString()}</div>
                         <div class="text-sm text-gray-500">Winning Tickets</div>
                     </div>
                 </div>
@@ -2071,24 +2375,43 @@
 
             document.getElementById('sim-results').innerHTML = html;
 
-            // Show sample tickets
+            // Show sample tickets with match highlighting
             if (data.tickets && data.tickets.length > 0) {
                 document.getElementById('sim-tickets').classList.remove('hidden');
-                document.getElementById('sim-tickets-container').innerHTML = data.tickets.slice(0, 20).map((t, i) => `
-                    <div class="ticket-card ${t.prize > 0 ? 'has-match' : ''}">
+                const drawWhites = new Set(targetDraw.white_balls);
+                const drawPB = targetDraw.powerball;
+
+                document.getElementById('sim-tickets-container').innerHTML = data.tickets.slice(0, 20).map((t, i) => {
+                    // Calculate matches client-side
+                    const matchedWhites = t.white_balls.filter(n => drawWhites.has(n));
+                    const pbMatch = t.powerball === drawPB;
+                    const whiteCount = matchedWhites.length;
+
+                    // Calculate prize based on matches
+                    const prizeMap = {
+                        '5-true': 200000000, '5-false': 1000000,
+                        '4-true': 50000, '4-false': 100,
+                        '3-true': 100, '3-false': 7,
+                        '2-true': 7, '1-true': 4, '0-true': 4
+                    };
+                    const prize = prizeMap[`${whiteCount}-${pbMatch}`] || 0;
+                    const tier = prize > 0 ? `${whiteCount}+${pbMatch ? 'PB' : '0'}` : null;
+
+                    return `
+                    <div class="ticket-card ${prize > 0 ? 'has-match' : ''}">
                         <div class="ticket-number">TICKET #${String(i+1).padStart(3, '0')}</div>
                         <div class="ticket-balls">
-                            ${t.white_balls.map(n => `<div class="ticket-ball white ${t.matched_whites.includes(n) ? 'ring-2 ring-green-400' : ''}">${n}</div>`).join('')}
-                            <div class="ticket-ball red ${t.powerball_match ? 'ring-2 ring-green-400' : ''}">${t.powerball}</div>
+                            ${t.white_balls.map(n => `<div class="ticket-ball white ${matchedWhites.includes(n) ? 'ring-2 ring-green-400' : ''}">${n}</div>`).join('')}
+                            <div class="ticket-ball red ${pbMatch ? 'ring-2 ring-green-400' : ''}">${t.powerball}</div>
                         </div>
                         <div class="ticket-divider"></div>
                         <div class="ticket-footer">
                             <span class="ticket-strategy ${getStrategyClass(t.strategy)}">${formatStrategy(t.strategy)}</span>
-                            ${t.prize > 0 ? `<span class="text-green-400 font-bold">+$${t.prize.toLocaleString()}</span>` : '<span class="ticket-price text-red-400">-$2</span>'}
+                            ${prize > 0 ? `<span class="text-green-400 font-bold">+$${prize.toLocaleString()}</span>` : '<span class="ticket-price text-red-400">-$2</span>'}
                         </div>
-                        ${t.prize > 0 ? `<div class="text-center text-xs text-green-400 mt-2">${t.tier} Winner!</div>` : ''}
+                        ${prize > 0 ? `<div class="text-center text-xs text-green-400 mt-2">${tier} Winner!</div>` : ''}
                     </div>
-                `).join('');
+                `}).join('');
             } else {
                 document.getElementById('sim-tickets').classList.add('hidden');
             }
@@ -2105,11 +2428,27 @@
         }
 
         // Load History
-        async function loadHistory() {
-            const response = await fetch('/api/recent-draws?count=30');
-            const draws = await response.json();
+        let allHistoryDraws = [];
 
-            document.getElementById('history-container').innerHTML = draws.map(d => `
+        async function loadHistory() {
+            // Fetch enough draws to cover multiple years (3 draws/week × 52 weeks × 5 years ≈ 780)
+            const response = await fetch('/api/recent-draws?count=500');
+            allHistoryDraws = await response.json();
+
+            // Default to current year (2025)
+            filterHistoryByYear();
+        }
+
+        function filterHistoryByYear() {
+            const yearSelect = document.getElementById('history-year-select');
+            const selectedYear = yearSelect.value;
+
+            let filteredDraws = allHistoryDraws;
+            if (selectedYear !== 'all') {
+                filteredDraws = allHistoryDraws.filter(d => d.date.endsWith('/' + selectedYear));
+            }
+
+            document.getElementById('history-container').innerHTML = filteredDraws.map(d => `
                 <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     <span class="text-gray-600 w-24">${d.date}</span>
                     ${d.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}

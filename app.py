@@ -310,7 +310,7 @@ def test_against_draw():
 @app.route('/api/recent-draws')
 def recent_draws():
     """Get recent draws."""
-    count = min(int(request.args.get('count', 20)), 100)
+    count = min(int(request.args.get('count', 20)), 500)  # Support full year+ of draws
     recent = draws[-count:][::-1]
 
     return jsonify([
