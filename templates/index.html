@@ -669,6 +669,16 @@
         }
 
         @media (max-width: 768px) {
+            .header-inner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .countdown-bar {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
             .footer-content {
                 flex-direction: column;
                 text-align: center;
@@ -751,6 +761,19 @@
             background: #f3f4f6;
             padding: 6px 12px;
             border-radius: 8px;
+        }
+
+        .mobile-nav-toggle {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-nav-toggle {
+                display: inline-flex;
+            }
+            .tab-nav {
+                display: none;
+            }
         }
 
         @media (max-width: 640px) {
@@ -882,11 +905,11 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen flex flex-col overflow-x-hidden">
     <!-- Header -->
     <header class="bg-gradient-to-r from-blue-800 to-red-700 text-white py-3 shadow-lg sticky top-0 z-50 flex-shrink-0">
         <div class="w-full px-4">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between header-inner">
                 <!-- Left: Logo and Stats -->
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-3">
@@ -933,6 +956,20 @@
 
     <!-- Main Content -->
     <main class="w-full px-4 py-4 flex-1">
+        <!-- Mobile Nav Toggle -->
+        <button type="button" onclick="toggleMobileNav()" class="mobile-nav-toggle flex items-center gap-2 px-3 py-2 mb-2 rounded-lg border border-gray-300 bg-white text-sm text-gray-700 md:hidden">
+            <span class="material-icons" style="font-size:18px;">menu</span>
+            <span>Navigate</span>
+        </button>
+
+        <div id="mobile-nav" class="mobile-nav hidden mb-2 md:hidden bg-white border border-gray-200 rounded-lg shadow-sm">
+            <button onclick="showTab('generator')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Generate Tickets</button>
+            <button onclick="showTab('tickets')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Tickets</button>
+            <button onclick="showTab('analysis')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Analysis</button>
+            <button onclick="showTab('simulator')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Jackpot Simulator</button>
+            <button onclick="showTab('history')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Recent Draws</button>
+        </div>
+
         <!-- Tabs -->
         <nav class="tab-nav">
             <button onclick="showTab('generator')" id="tab-generator" class="tab-btn tab-active">
@@ -1035,7 +1072,7 @@
                         <div class="historical-sidebar">
                             <div class="historical-sidebar-header">
                                 <h3><span>🎯</span> Historical Winners</h3>
-                                <p>Tickets matching past draws</p>
+                                <p>These tickets match winning numbers from past draws. If played on those dates, they would have won!</p>
                             </div>
                             <div id="historical-matches-content">
                                 <div class="historical-sidebar-empty">
@@ -1243,6 +1280,12 @@
     <!-- Action Footer -->
     <div class="action-footer">
         <button onclick="generateTickets()" class="action-btn primary">Generate Tickets</button>
+
+        <div class="flex flex-col items-center text-xs text-gray-600">
+            <span class="font-medium">Session spend (est.)</span>
+            <span id="session-ticket-summary">0 tickets | $0</span>
+        </div>
+
         <div class="backtest-group">
             <span class="action-label">Backtest:</span>
             <select id="action-draws-select" class="action-select">
@@ -1266,6 +1309,15 @@
     <script>
         let currentTickets = [];
         let analysisData = null;
+        let totalGeneratedTickets = 0;
+        let totalGenerateClicks = 0;
+
+        // Mobile nav toggle
+        function toggleMobileNav() {
+            const nav = document.getElementById('mobile-nav');
+            if (!nav) return;
+            nav.classList.toggle('hidden');
+        }
 
         // Tab Management
         function showTab(tab) {
@@ -1274,8 +1326,18 @@
             document.getElementById(`content-${tab}`).classList.remove('hidden');
             document.getElementById(`tab-${tab}`).classList.add('tab-active');
 
+            const mobileNav = document.getElementById('mobile-nav');
+            if (mobileNav) mobileNav.classList.add('hidden');
+
             if (tab === 'analysis' && !analysisData) loadAnalysis();
             if (tab === 'history') loadHistory();
+        }
+
+        function updateSessionSummary() {
+            const el = document.getElementById('session-ticket-summary');
+            if (!el) return;
+            const totalCost = totalGeneratedTickets * 2;
+            el.textContent = `${totalGeneratedTickets} tickets | $${totalCost.toLocaleString()}`;
         }
 
         // Generate Tickets
@@ -1291,6 +1353,11 @@
 
             const data = await response.json();
             currentTickets = data.tickets;
+
+            // Update session counters
+            totalGenerateClicks += 1;
+            totalGeneratedTickets += data.count;
+            updateSessionSummary();
 
             document.getElementById('tickets-count').textContent = `${data.count} tickets | $${data.cost}`;
 
@@ -1472,10 +1539,8 @@
                         <span class="match-title">Historical Match</span>
                     </div>
                     <div class="match-details">
-                        This ticket would have won
-                        <span class="match-prize">${match.prize}</span>
-                        on ${match.date}
-                        <br>Prize tier: ${match.match_type} (${match.white_matches} white balls${match.powerball_match ? ' + Powerball' : ''})
+                        Won <span class="match-prize">${match.prize}</span> on ${match.date}
+                        <br>${match.white_matches} white balls${match.powerball_match ? ' + Powerball' : ''}
                     </div>
                 </div>
             `;
