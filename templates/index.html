@@ -385,10 +385,20 @@
                         Generate Tickets
                     </button>
 
-                    <button onclick="testAgainstLatest()"
-                            class="w-full mt-3 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition">
-                        Test Against Latest Draw
-                    </button>
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Test Against How Many Draws?</label>
+                        <select id="num-draws" class="w-full border rounded-lg px-4 py-2 mb-3">
+                            <option value="1">1 Draw (Latest)</option>
+                            <option value="5">5 Draws</option>
+                            <option value="10" selected>10 Draws</option>
+                            <option value="20">20 Draws</option>
+                            <option value="50">50 Draws</option>
+                        </select>
+                        <button onclick="testAgainstDraws()"
+                                class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition">
+                            Test Against Previous Draws
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Generated Tickets -->
@@ -709,21 +719,21 @@
             return colors[strategy] || 'gray';
         }
 
-        // Test Against Latest Draw
-        async function testAgainstLatest() {
+        // Test Against Previous Draws
+        async function testAgainstDraws() {
             if (currentTickets.length === 0) {
                 alert('Generate tickets first!');
                 return;
             }
 
-            // Use the simulate API with the current ticket count
             const budget = currentTickets.length * 2;
             const strategy = document.getElementById('strategy').value;
+            const numDraws = parseInt(document.getElementById('num-draws').value);
 
             const response = await fetch('/api/simulate', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ budget, strategy, draw_index: 0 })
+                body: JSON.stringify({ budget, strategy, num_draws: numDraws })
             });
 
             const data = await response.json();
@@ -731,11 +741,13 @@
             const isProfit = summary.profit_loss >= 0;
 
             let html = `
-                <div class="mb-3 p-3 bg-blue-50 rounded-lg">
-                    <strong>Tested against:</strong> ${data.target_draw.date}<br>
-                    <div class="flex gap-2 mt-2">
-                        ${data.target_draw.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}
-                        <div class="ball powerball text-sm">${data.target_draw.powerball}</div>
+                <!-- Summary Header -->
+                <div class="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                    <div class="text-lg font-bold text-gray-800 mb-1">
+                        Tested ${summary.num_draws} Draws
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        ${currentTickets.length} tickets played ${summary.num_draws}x = ${(currentTickets.length * summary.num_draws).toLocaleString()} total plays
                     </div>
                 </div>
 
@@ -743,64 +755,113 @@
                 <div class="grid grid-cols-3 gap-3 mb-4">
                     <div class="text-center p-3 bg-gray-100 rounded-lg">
                         <div class="text-xl font-bold text-gray-800">$${summary.total_spent.toLocaleString()}</div>
-                        <div class="text-xs text-gray-500">Spent</div>
+                        <div class="text-xs text-gray-500">Total Spent</div>
                     </div>
                     <div class="text-center p-3 bg-gray-100 rounded-lg">
                         <div class="text-xl font-bold ${summary.total_won > 0 ? 'text-green-600' : 'text-gray-400'}">$${summary.total_won.toLocaleString()}</div>
-                        <div class="text-xs text-gray-500">Won</div>
+                        <div class="text-xs text-gray-500">Total Won</div>
                     </div>
-                    <div class="text-center p-3 ${isProfit ? 'bg-green-100' : 'bg-red-100'} rounded-lg">
-                        <div class="text-xl font-bold ${isProfit ? 'text-green-600' : 'text-red-600'}">
+                    <div class="text-center p-4 ${isProfit ? 'bg-green-100' : 'bg-red-100'} rounded-lg">
+                        <div class="text-2xl font-bold ${isProfit ? 'text-green-600' : 'text-red-600'}">
                             ${isProfit ? '+' : '-'}$${Math.abs(summary.profit_loss).toLocaleString()}
                         </div>
-                        <div class="text-xs ${isProfit ? 'text-green-600' : 'text-red-600'}">${isProfit ? 'Profit' : 'Loss'}</div>
+                        <div class="text-xs ${isProfit ? 'text-green-600' : 'text-red-600'}">${isProfit ? 'Net Profit' : 'Net Loss'}</div>
                     </div>
                 </div>
 
-                <div class="flex justify-between items-center mb-3 p-2 ${summary.roi >= 0 ? 'bg-green-50' : 'bg-red-50'} rounded">
-                    <span class="text-sm font-medium">ROI</span>
-                    <span class="font-bold ${summary.roi >= 0 ? 'text-green-600' : 'text-red-600'}">${summary.roi >= 0 ? '+' : ''}${summary.roi}%</span>
+                <!-- ROI and Stats -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="p-3 ${summary.roi >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium">Overall ROI</span>
+                            <span class="text-lg font-bold ${summary.roi >= 0 ? 'text-green-600' : 'text-red-600'}">${summary.roi >= 0 ? '+' : ''}${summary.roi}%</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium">Avg per Draw</span>
+                            <span class="text-lg font-bold ${summary.avg_profit_per_draw >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${summary.avg_profit_per_draw >= 0 ? '+' : '-'}$${Math.abs(summary.avg_profit_per_draw).toLocaleString()}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Win Rate -->
+                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium">Draws with Winners</span>
+                        <span class="font-bold">${summary.draws_with_winners} / ${summary.num_draws} (${((summary.draws_with_winners / summary.num_draws) * 100).toFixed(0)}%)</span>
+                    </div>
                 </div>
             `;
 
-            if (summary.winners > 0) {
-                html += `<div class="text-green-600 font-bold mb-2">Winners: ${summary.winners}</div>`;
+            // Prize breakdown
+            if (Object.keys(summary.by_tier).length > 0) {
+                html += `
+                    <div class="mb-4">
+                        <h4 class="font-medium mb-2">Total Prize Breakdown:</h4>
+                        <div class="space-y-1">
+                            ${Object.entries(summary.by_tier)
+                                .sort((a, b) => getPrizeTierOrder(a[0]) - getPrizeTierOrder(b[0]))
+                                .map(([tier, count]) => `
+                                    <div class="flex justify-between text-sm p-2 bg-green-50 rounded">
+                                        <span>${tier}</span>
+                                        <span class="text-green-600 font-medium">${count}x = $${(getPrizeValue(tier) * count).toLocaleString()}</span>
+                                    </div>
+                                `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
 
-                // Show prize breakdown
-                if (Object.keys(summary.by_tier).length > 0) {
-                    html += `<div class="space-y-1 mb-3">`;
-                    Object.entries(summary.by_tier)
-                        .filter(([tier, count]) => tier !== 'No Win')
-                        .sort((a, b) => getPrizeTierOrder(a[0]) - getPrizeTierOrder(b[0]))
-                        .forEach(([tier, count]) => {
-                            html += `
-                                <div class="flex justify-between text-sm p-2 bg-green-50 rounded">
-                                    <span>${tier}</span>
-                                    <span class="text-green-600 font-medium">${count}x = $${(getPrizeValue(tier) * count).toLocaleString()}</span>
-                                </div>
-                            `;
-                        });
-                    html += `</div>`;
-                }
-
-                // Show sample winning tickets
-                const winningTickets = data.tickets.filter(t => t.prize > 0).slice(0, 5);
-                if (winningTickets.length > 0) {
-                    html += `<div class="text-sm font-medium mb-2">Sample Winners:</div>`;
-                    winningTickets.forEach(t => {
-                        html += `
-                            <div class="p-2 bg-green-50 rounded mb-2">
-                                <div class="flex gap-1 mb-1">
-                                    ${t.white_balls.map(n => `<div class="w-8 h-8 rounded-full ${t.matched_whites.includes(n) ? 'bg-green-500 text-white' : 'bg-gray-200'} flex items-center justify-center text-sm">${n}</div>`).join('')}
-                                    <div class="w-8 h-8 rounded-full ${t.powerball_match ? 'bg-red-500' : 'bg-gray-300'} text-white flex items-center justify-center text-sm">${t.powerball}</div>
-                                </div>
-                                <div class="text-sm"><strong>${t.tier}</strong> = <span class="text-green-600 font-bold">+$${t.prize.toLocaleString()}</span></div>
+            // Best and Worst draws
+            if (summary.best_draw && summary.num_draws > 1) {
+                html += `
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="text-xs text-green-600 font-medium mb-1">BEST DRAW</div>
+                            <div class="font-bold">${summary.best_draw.date}</div>
+                            <div class="text-sm text-green-600">
+                                ${summary.best_draw.profit_loss >= 0 ? '+' : '-'}$${Math.abs(summary.best_draw.profit_loss).toLocaleString()}
+                                ${summary.best_draw.winners > 0 ? `(${summary.best_draw.winners} winners)` : ''}
                             </div>
-                        `;
-                    });
-                }
-            } else {
-                html += `<div class="text-red-600">No winners this time. The expected ROI is -${(100 - (1/292201338 * 100)).toFixed(2)}%</div>`;
+                        </div>
+                        <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <div class="text-xs text-red-600 font-medium mb-1">WORST DRAW</div>
+                            <div class="font-bold">${summary.worst_draw.date}</div>
+                            <div class="text-sm text-red-600">
+                                -$${Math.abs(summary.worst_draw.profit_loss).toLocaleString()}
+                                (${summary.worst_draw.winners} winners)
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Individual draw results (collapsible)
+            if (data.draws && data.draws.length > 1) {
+                html += `
+                    <details class="mt-4">
+                        <summary class="cursor-pointer font-medium text-blue-600 hover:text-blue-800">
+                            View All ${data.draws.length} Draw Results
+                        </summary>
+                        <div class="mt-2 max-h-64 overflow-y-auto space-y-2">
+                            ${data.draws.map(d => `
+                                <div class="p-2 bg-gray-50 rounded flex justify-between items-center text-sm">
+                                    <div>
+                                        <span class="font-medium">${d.date}</span>
+                                        <span class="text-gray-500 ml-2">${d.white_balls.join(', ')} + ${d.powerball}</span>
+                                    </div>
+                                    <div class="${d.profit_loss >= 0 ? 'text-green-600' : 'text-red-600'} font-medium">
+                                        ${d.profit_loss >= 0 ? '+' : '-'}$${Math.abs(d.profit_loss).toLocaleString()}
+                                        ${d.winners > 0 ? `<span class="text-green-500">(${d.winners}W)</span>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </details>
+                `;
             }
 
             document.getElementById('test-results-content').innerHTML = html;

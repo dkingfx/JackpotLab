@@ -164,89 +164,107 @@ def check_ticket_against_draw(ticket_white, ticket_pb, draw):
 
 @app.route('/api/simulate', methods=['POST'])
 def simulate_budget():
-    """Simulate buying tickets and compare against a drawing."""
+    """Simulate buying tickets and compare against multiple drawings."""
     data = request.json
     budget = min(int(data.get('budget', 10)), 10000)  # Max $10,000
     strategy = data.get('strategy', 'mixed')
-    draw_index = data.get('draw_index', 0)  # 0 = most recent
+    num_draws = min(int(data.get('num_draws', 1)), 50)  # Max 50 draws
 
-    # Get target draw
+    # Get target draws
     if not draws:
         return jsonify({'error': 'No draws available'}), 400
-
-    target_draw = draws[-(draw_index + 1)] if draw_index < len(draws) else draws[-1]
 
     # Calculate tickets from budget ($2 per ticket)
     ticket_count = budget // 2
     if ticket_count == 0:
         return jsonify({'error': 'Budget too low (minimum $2)'}), 400
 
-    # Generate tickets
-    tickets = generator.generate_tickets(ticket_count, strategy)
+    # Generate tickets once (same tickets tested against all draws)
+    generated_tickets = generator.generate_tickets(ticket_count, strategy)
 
-    # Generate tickets and check against target draw
-    results = {
-        'tickets': [],
-        'summary': {
-            'total_spent': ticket_count * 2,
-            'total_won': 0,
-            'profit_loss': 0,
-            'ticket_count': ticket_count,
-            'winners': 0,
-            'by_tier': {}
-        },
-        'target_draw': {
+    # Test against multiple draws
+    draws_results = []
+    total_spent_all = 0
+    total_won_all = 0
+    total_tier_counts = {}
+    best_draw = None
+    worst_draw = None
+
+    for draw_idx in range(num_draws):
+        if draw_idx >= len(draws):
+            break
+
+        target_draw = draws[-(draw_idx + 1)]
+        draw_spent = ticket_count * 2
+        draw_won = 0
+        draw_winners = 0
+        draw_tiers = {}
+
+        for t in generated_tickets:
+            match_result = check_ticket_against_draw(t.white_balls, t.powerball, target_draw)
+            prize = match_result['prize']
+
+            wm = match_result['white_matches']
+            pm = match_result['powerball_match']
+            if prize == 'JACKPOT':
+                tier = '5+PB'
+                prize_value = 200000000
+            elif prize > 0:
+                tier = f"{wm}+{'PB' if pm else '0'}"
+                prize_value = prize
+            else:
+                tier = 'No Win'
+                prize_value = 0
+
+            if prize_value > 0:
+                draw_won += prize_value
+                draw_winners += 1
+                draw_tiers[tier] = draw_tiers.get(tier, 0) + 1
+                total_tier_counts[tier] = total_tier_counts.get(tier, 0) + 1
+
+        draw_profit = draw_won - draw_spent
+        draw_result = {
             'date': target_draw.date.strftime('%m/%d/%Y'),
             'white_balls': list(target_draw.white_balls),
             'powerball': target_draw.powerball,
-            'multiplier': target_draw.multiplier
+            'spent': draw_spent,
+            'won': draw_won,
+            'profit_loss': draw_profit,
+            'winners': draw_winners,
+            'tiers': draw_tiers
         }
+        draws_results.append(draw_result)
+
+        total_spent_all += draw_spent
+        total_won_all += draw_won
+
+        if best_draw is None or draw_profit > best_draw['profit_loss']:
+            best_draw = draw_result
+        if worst_draw is None or draw_profit < worst_draw['profit_loss']:
+            worst_draw = draw_result
+
+    # Build response
+    results = {
+        'tickets': [{
+            'white_balls': list(t.white_balls),
+            'powerball': t.powerball,
+            'strategy': t.strategy
+        } for t in generated_tickets[:50]],  # First 50 tickets
+        'summary': {
+            'num_draws': len(draws_results),
+            'ticket_count': ticket_count,
+            'total_spent': total_spent_all,
+            'total_won': total_won_all,
+            'profit_loss': total_won_all - total_spent_all,
+            'roi': round((total_won_all / total_spent_all - 1) * 100, 2) if total_spent_all > 0 else 0,
+            'avg_profit_per_draw': round((total_won_all - total_spent_all) / len(draws_results), 2) if draws_results else 0,
+            'by_tier': total_tier_counts,
+            'best_draw': best_draw,
+            'worst_draw': worst_draw,
+            'draws_with_winners': sum(1 for d in draws_results if d['winners'] > 0)
+        },
+        'draws': draws_results
     }
-
-    tier_counts = {
-        '5+PB': 0, '5+0': 0, '4+PB': 0, '4+0': 0,
-        '3+PB': 0, '3+0': 0, '2+PB': 0, '1+PB': 0, '0+PB': 0, 'No Win': 0
-    }
-
-    for i, t in enumerate(tickets):
-        match_result = check_ticket_against_draw(t.white_balls, t.powerball, target_draw)
-        prize = match_result['prize']
-
-        # Determine tier name
-        wm = match_result['white_matches']
-        pm = match_result['powerball_match']
-        if prize == 'JACKPOT':
-            tier = '5+PB'
-            prize_value = 200000000  # Assume $200M jackpot
-        elif prize > 0:
-            tier = f"{wm}+{'PB' if pm else '0'}"
-            prize_value = prize
-        else:
-            tier = 'No Win'
-            prize_value = 0
-
-        tier_counts[tier] = tier_counts.get(tier, 0) + 1
-
-        if prize_value > 0:
-            results['summary']['total_won'] += prize_value
-            results['summary']['winners'] += 1
-
-        # Only include first 100 tickets in response to avoid huge payloads
-        if i < 100:
-            results['tickets'].append({
-                'white_balls': list(t.white_balls),
-                'powerball': t.powerball,
-                'strategy': t.strategy,
-                'white_matches': match_result['white_matches'],
-                'powerball_match': match_result['powerball_match'],
-                'matched_whites': match_result['matched_whites'],
-                'prize': prize_value,
-                'tier': tier
-            })
-
-    results['summary']['profit_loss'] = results['summary']['total_won'] - results['summary']['total_spent']
-    results['summary']['by_tier'] = {k: v for k, v in tier_counts.items() if v > 0}
-    results['summary']['roi'] = round((results['summary']['total_won'] / results['summary']['total_spent'] - 1) * 100, 2) if results['summary']['total_spent'] > 0 else 0
 
     return jsonify(results)
 
