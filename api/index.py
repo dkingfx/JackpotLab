@@ -174,6 +174,132 @@ def api_recent():
         'multiplier': d.multiplier
     } for d in recent])
 
+# Prize structure (without Power Play)
+PRIZE_TIERS = {
+    (5, True): 'JACKPOT',
+    (5, False): 1000000,
+    (4, True): 50000,
+    (4, False): 100,
+    (3, True): 100,
+    (3, False): 7,
+    (2, True): 7,
+    (1, True): 4,
+    (0, True): 4,
+}
+
+def calculate_prize(white_matches, pb_match):
+    """Calculate prize for a ticket based on matches."""
+    key = (white_matches, pb_match)
+    return PRIZE_TIERS.get(key, 0)
+
+def check_ticket_against_draw(ticket_white, ticket_pb, draw):
+    """Check a ticket against a specific draw and return match details."""
+    white_set = set(ticket_white)
+    draw_white_set = set(draw.white_balls)
+    white_matches = len(white_set & draw_white_set)
+    pb_match = ticket_pb == draw.powerball
+    prize = calculate_prize(white_matches, pb_match)
+
+    return {
+        'white_matches': white_matches,
+        'powerball_match': pb_match,
+        'prize': prize,
+        'matched_whites': list(white_set & draw_white_set),
+    }
+
+@app.route('/api/simulate', methods=['POST', 'OPTIONS'])
+def api_simulate():
+    """Simulate buying tickets and compare against a drawing."""
+    if request.method == 'OPTIONS':
+        return '', 204
+
+    data = request.json or {}
+    budget = min(int(data.get('budget', 10)), 10000)  # Max $10,000
+    strategy = data.get('strategy', 'mixed')
+    draw_index = data.get('draw_index', 0)  # 0 = most recent
+
+    # Get target draw
+    if not draws:
+        return jsonify({'error': 'No draws available'}), 400
+
+    target_draw = draws[-(draw_index + 1)] if draw_index < len(draws) else draws[-1]
+
+    # Calculate tickets from budget ($2 per ticket)
+    ticket_count = budget // 2
+    if ticket_count == 0:
+        return jsonify({'error': 'Budget too low (minimum $2)'}), 400
+
+    strategies = ['random', 'frequency', 'hybrid', 'importance']
+
+    # Generate tickets and check against target draw
+    results = {
+        'tickets': [],
+        'summary': {
+            'total_spent': ticket_count * 2,
+            'total_won': 0,
+            'profit_loss': 0,
+            'ticket_count': ticket_count,
+            'winners': 0,
+            'by_tier': {}
+        },
+        'target_draw': {
+            'date': target_draw.date.strftime('%m/%d/%Y'),
+            'white_balls': list(target_draw.white_balls),
+            'powerball': target_draw.powerball,
+            'multiplier': target_draw.multiplier
+        }
+    }
+
+    tier_counts = {
+        '5+PB': 0, '5+0': 0, '4+PB': 0, '4+0': 0,
+        '3+PB': 0, '3+0': 0, '2+PB': 0, '1+PB': 0, '0+PB': 0, 'No Win': 0
+    }
+
+    for i in range(ticket_count):
+        strat = strategies[i % len(strategies)] if strategy == 'mixed' else strategy
+        white, pb, s = generate_ticket(strat)
+
+        match_result = check_ticket_against_draw(white, pb, target_draw)
+        prize = match_result['prize']
+
+        # Determine tier name
+        wm = match_result['white_matches']
+        pm = match_result['powerball_match']
+        if prize == 'JACKPOT':
+            tier = '5+PB'
+            prize_value = 200000000  # Assume $200M jackpot
+        elif prize > 0:
+            tier = f"{wm}+{'PB' if pm else '0'}"
+            prize_value = prize
+        else:
+            tier = 'No Win'
+            prize_value = 0
+
+        tier_counts[tier] = tier_counts.get(tier, 0) + 1
+
+        if prize_value > 0:
+            results['summary']['total_won'] += prize_value
+            results['summary']['winners'] += 1
+
+        # Only include first 100 tickets in response to avoid huge payloads
+        if i < 100:
+            results['tickets'].append({
+                'white_balls': list(white),
+                'powerball': pb,
+                'strategy': s,
+                'white_matches': match_result['white_matches'],
+                'powerball_match': match_result['powerball_match'],
+                'matched_whites': match_result['matched_whites'],
+                'prize': prize_value,
+                'tier': tier
+            })
+
+    results['summary']['profit_loss'] = results['summary']['total_won'] - results['summary']['total_spent']
+    results['summary']['by_tier'] = {k: v for k, v in tier_counts.items() if v > 0}
+    results['summary']['roi'] = round((results['summary']['total_won'] / results['summary']['total_spent'] - 1) * 100, 2) if results['summary']['total_spent'] > 0 else 0
+
+    return jsonify(results)
+
 @app.route('/api/info', methods=['GET'])
 def api_info():
     return jsonify({
