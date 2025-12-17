@@ -33,14 +33,10 @@
             display: flex;
             gap: 8px;
             border-bottom: 2px solid #e5e7eb;
-            position: sticky;
-            top: 0;
             background: #f3f4f6;
-            z-index: 30;
-            padding-top: 4px;
-            margin-top: -16px;
-            padding-bottom: 8px;
-            margin-bottom: 24px;
+            z-index: 40;
+            padding: 8px 16px;
+            flex-shrink: 0;
         }
 
         .tab-btn {
@@ -1159,7 +1155,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
     <!-- Header -->
     <header class="bg-gradient-to-r from-blue-800 to-red-700 text-white py-3 shadow-lg sticky top-0 z-50 flex-shrink-0">
         <div class="w-full px-4">
@@ -1221,8 +1217,27 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main class="w-full px-4 py-4 pb-20">
+    <!-- Tab Navigation (Sticky below header) -->
+    <nav class="tab-nav hidden md:flex">
+        <button onclick="showTab('generator')" id="tab-generator" class="tab-btn tab-active">
+            <span>Generate Tickets</span>
+        </button>
+        <button onclick="showTab('tickets')" id="tab-tickets" class="tab-btn">
+            <span>Tickets</span>
+        </button>
+        <button onclick="showTab('analysis')" id="tab-analysis" class="tab-btn">
+            <span>Analysis</span>
+        </button>
+        <button onclick="showTab('simulator')" id="tab-simulator" class="tab-btn">
+            <span>Jackpot Simulator</span>
+        </button>
+        <button onclick="showTab('history')" id="tab-history" class="tab-btn">
+            <span>Recent Draws</span>
+        </button>
+    </nav>
+
+    <!-- Main Content (Scrollable) -->
+    <main class="flex-1 overflow-y-auto px-4 py-4 pb-24">
         <!-- Mobile Nav Toggle -->
         <button
             type="button"
@@ -1248,25 +1263,6 @@
             <button id="mobile-tab-simulator" onclick="showTab('simulator')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Jackpot Simulator</button>
             <button id="mobile-tab-history" onclick="showTab('history')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Recent Draws</button>
         </div>
-
-        <!-- Tabs -->
-        <nav class="tab-nav">
-            <button onclick="showTab('generator')" id="tab-generator" class="tab-btn tab-active">
-                <span>Generate Tickets</span>
-            </button>
-            <button onclick="showTab('tickets')" id="tab-tickets" class="tab-btn">
-                <span>Tickets</span>
-            </button>
-            <button onclick="showTab('analysis')" id="tab-analysis" class="tab-btn">
-                <span>Analysis</span>
-            </button>
-            <button onclick="showTab('simulator')" id="tab-simulator" class="tab-btn">
-                <span>Jackpot Simulator</span>
-            </button>
-            <button onclick="showTab('history')" id="tab-history" class="tab-btn">
-                <span>Recent Draws</span>
-            </button>
-        </nav>
 
         <!-- Generator Tab -->
         <div id="content-generator" class="tab-content">
