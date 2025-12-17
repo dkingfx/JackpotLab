@@ -1601,8 +1601,8 @@
 
                     <!-- Simulated Tickets -->
                     <div id="sim-tickets" class="mt-6 hidden">
-                        <h4 class="font-bold mb-3 border-t pt-4">Sample Tickets</h4>
-                        <div id="sim-tickets-container" class="tickets-grid max-h-96"></div>
+                        <h4 class="font-bold mb-3 border-t pt-4">Sample Tickets (First 50)</h4>
+                        <div id="sim-tickets-container" class="tickets-grid max-h-96 overflow-y-auto"></div>
                     </div>
                 </div>
             </div>
@@ -2496,7 +2496,7 @@
                 const drawWhites = new Set(targetDraw.white_balls);
                 const drawPB = targetDraw.powerball;
 
-                document.getElementById('sim-tickets-container').innerHTML = data.tickets.slice(0, 20).map((t, i) => {
+                document.getElementById('sim-tickets-container').innerHTML = data.tickets.slice(0, 50).map((t, i) => {
                     // Calculate matches client-side
                     const matchedWhites = t.white_balls.filter(n => drawWhites.has(n));
                     const pbMatch = t.powerball === drawPB;
