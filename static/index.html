@@ -1597,20 +1597,31 @@
         }
 
         function handleTicketInput(inputEl) {
-            // Allow empty input while typing - don't force a value
-            if (inputEl.value === '') {
-                document.getElementById('ticket-cost').textContent = '0';
-                updateSessionSummary();
-                return;
+            const value = inputEl.value;
+            const numValue = parseInt(value, 10);
+
+            // Calculate cost (0 if empty/invalid, otherwise value * 2)
+            let displayCount = 0;
+            let displayCost = 0;
+
+            if (value !== '' && !isNaN(numValue) && numValue > 0) {
+                displayCount = Math.min(numValue, 20000);
+                displayCost = displayCount * 2;
             }
 
-            let value = parseInt(inputEl.value, 10);
-            if (isNaN(value)) return; // Don't interfere while typing
-
-            // Update cost displays
+            // Update the cost label next to input
             const costSpan = document.getElementById('ticket-cost');
-            if (costSpan) costSpan.textContent = (Math.min(Math.max(value, 0), 20000) * 2).toLocaleString();
-            updateSessionSummary();
+            if (costSpan) costSpan.textContent = displayCost.toLocaleString();
+
+            // Update the footer batch display
+            const summaryEl = document.getElementById('session-ticket-summary');
+            if (summaryEl) {
+                if (displayCount === 0) {
+                    summaryEl.textContent = '0 tickets | $0';
+                } else {
+                    summaryEl.textContent = `${displayCount.toLocaleString()} ticket${displayCount !== 1 ? 's' : ''} | $${displayCost.toLocaleString()}`;
+                }
+            }
         }
 
         function validateTicketInput(inputEl) {
