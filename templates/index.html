@@ -1652,35 +1652,6 @@
         </div>
     </main>
 
-    <!-- Action Footer -->
-    <div class="action-footer" style="position: fixed; bottom: 0; left: 0; right: 0; background: white; z-index: 9999; display: flex; padding: 10px 24px;">
-        <button onclick="generateTickets()" class="action-btn primary">Generate Tickets</button>
-
-        <div class="footer-row">
-            <div class="session-info">
-                <span class="session-label">Session:</span>
-                <span id="session-ticket-summary">0 tickets | $0</span>
-            </div>
-
-            <div class="backtest-group">
-                <span class="action-label">Backtest:</span>
-                <select id="action-draws-select" class="action-select">
-                    <option value="1">1 draw</option>
-                    <option value="5">5 draws</option>
-                    <option value="10" selected>10 draws</option>
-                    <option value="20">20 draws</option>
-                    <option value="50">50 draws</option>
-                </select>
-                <button onclick="testAgainstDrawsFromFooter()" class="action-btn secondary">Run</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer (hidden - disclaimer shown in action footer area) -->
-    <footer class="hidden">
-        <span>Entertainment only. Not affiliated with Powerball. Gamble responsibly.</span>
-    </footer>
-
     <script>
         let currentTickets = [];
         let analysisData = null;
