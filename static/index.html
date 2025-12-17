@@ -1423,6 +1423,21 @@
 
         <!-- Analysis Tab -->
         <div id="content-analysis" class="tab-content hidden">
+            <!-- Color Legend -->
+            <div class="flex items-center justify-center gap-6 mb-6 py-3 px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 rounded-full bg-orange-500"></span>
+                    <span class="text-sm font-medium text-gray-700">Hot (Above Expected)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 rounded-full bg-blue-500"></span>
+                    <span class="text-sm font-medium text-gray-700">Cold (Below Expected)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 rounded-full bg-purple-500"></span>
+                    <span class="text-sm font-medium text-gray-700">Overdue (Not Drawn Recently)</span>
+                </div>
+            </div>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Hot White Balls -->
                 <div class="stat-card">
@@ -2195,13 +2210,13 @@
                 </div>
             `).join('');
 
-            // Powerballs - both in circles
+            // Powerballs - both in circles (orange = hot, blue = cold)
             document.getElementById('hot-pb').innerHTML = analysisData.hot_pb.slice(0, 5).map(n => `
-                <div class="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center text-sm font-bold">${n.number}</div>
+                <div class="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-bold">${n.number}</div>
             `).join('');
 
             document.getElementById('cold-pb').innerHTML = analysisData.cold_pb.slice(0, 5).map(n => `
-                <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-700 flex items-center justify-center text-sm font-bold">${n.number}</div>
+                <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold">${n.number}</div>
             `).join('');
 
             // Hot pairs
