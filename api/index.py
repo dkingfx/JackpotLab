@@ -322,6 +322,94 @@ def api_simulate():
 
     return jsonify(results)
 
+@app.route('/api/test-tickets', methods=['POST', 'OPTIONS'])
+def api_test_tickets():
+    """Test user's existing tickets against historical draws."""
+    if request.method == 'OPTIONS':
+        return '', 204
+
+    data = request.json or {}
+    tickets_data = data.get('tickets', [])
+    num_draws = min(int(data.get('num_draws', 1)), 50)
+
+    if not tickets_data:
+        return jsonify({'error': 'No tickets provided'}), 400
+
+    if not draws:
+        return jsonify({'error': 'No draws available'}), 400
+
+    # Test provided tickets against historical draws
+    draws_results = []
+    total_won_all = 0
+    total_tier_counts = {}
+    best_draw = None
+    worst_draw = None
+    ticket_cost = len(tickets_data) * 2
+
+    for draw_idx in range(num_draws):
+        if draw_idx >= len(draws):
+            break
+
+        target_draw = draws[-(draw_idx + 1)]
+        draw_won = 0
+        draw_winners = 0
+        draw_tiers = {}
+
+        for t in tickets_data:
+            match_result = check_ticket_against_draw(t['white_balls'], t['powerball'], target_draw)
+            prize = match_result['prize']
+
+            wm = match_result['white_matches']
+            pm = match_result['powerball_match']
+            if prize == 'JACKPOT':
+                tier = '5+PB'
+                prize_value = 200000000
+            elif prize > 0:
+                tier = f"{wm}+{'PB' if pm else '0'}"
+                prize_value = prize
+            else:
+                tier = 'No Win'
+                prize_value = 0
+
+            if prize_value > 0:
+                draw_won += prize_value
+                draw_winners += 1
+                draw_tiers[tier] = draw_tiers.get(tier, 0) + 1
+                total_tier_counts[tier] = total_tier_counts.get(tier, 0) + 1
+
+        draw_result = {
+            'date': target_draw.date.strftime('%m/%d/%Y'),
+            'white_balls': list(target_draw.white_balls),
+            'powerball': target_draw.powerball,
+            'won': draw_won,
+            'winners': draw_winners,
+            'tiers': draw_tiers
+        }
+        draws_results.append(draw_result)
+
+        total_won_all += draw_won
+
+        if best_draw is None or draw_won > best_draw['won']:
+            best_draw = draw_result
+        if worst_draw is None or draw_won < worst_draw['won']:
+            worst_draw = draw_result
+
+    results = {
+        'summary': {
+            'num_draws': len(draws_results),
+            'ticket_count': len(tickets_data),
+            'ticket_cost': ticket_cost,
+            'total_won': total_won_all,
+            'by_tier': total_tier_counts,
+            'best_draw': best_draw,
+            'worst_draw': worst_draw,
+            'draws_with_winners': sum(1 for d in draws_results if d['winners'] > 0)
+        },
+        'draws': draws_results
+    }
+
+    return jsonify(results)
+
 @app.route('/api/info', methods=['GET'])
 def api_info():
     return jsonify({
