@@ -283,7 +283,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-gradient-to-r from-blue-800 to-red-700 text-white py-6 shadow-lg">
         <div class="container mx-auto px-4">
@@ -315,7 +315,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 py-8 flex-grow">
         <!-- Tabs -->
         <nav class="tab-nav">
             <button onclick="showTab('generator')" id="tab-generator" class="tab-btn tab-active">
@@ -574,7 +574,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+    <footer class="bg-gray-800 text-gray-400 py-8 mt-auto">
         <div class="container mx-auto px-4 text-center">
             <div class="flex items-center justify-center gap-2 mb-4">
                 <span class="text-2xl">🎰</span>
