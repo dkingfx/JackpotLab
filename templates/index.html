@@ -767,6 +767,19 @@
             display: none;
         }
 
+        .hamburger-icon {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .hamburger-line {
+            width: 16px;
+            height: 2px;
+            border-radius: 9999px;
+            background-color: #4b5563;
+        }
+
         @media (max-width: 768px) {
             .mobile-nav-toggle {
                 display: inline-flex;
@@ -957,9 +970,18 @@
     <!-- Main Content -->
     <main class="w-full px-4 py-4 flex-1">
         <!-- Mobile Nav Toggle -->
-        <button type="button" onclick="toggleMobileNav()" class="mobile-nav-toggle flex items-center gap-2 px-3 py-2 mb-2 rounded-lg border border-gray-300 bg-white text-sm text-gray-700 md:hidden">
-            <span class="material-icons" style="font-size:18px;">menu</span>
-            <span>Navigate</span>
+        <button
+            type="button"
+            onclick="toggleMobileNav()"
+            class="mobile-nav-toggle w-full flex items-center justify-between px-4 py-2 mb-2 rounded-lg border border-gray-300 bg-white text-sm text-gray-700 md:hidden">
+            <div class="flex items-center gap-2">
+                <span class="hamburger-icon" aria-hidden="true">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </span>
+                <span class="font-medium">Menu</span>
+            </div>
         </button>
 
         <div id="mobile-nav" class="mobile-nav hidden mb-2 md:hidden bg-white border border-gray-200 rounded-lg shadow-sm">
