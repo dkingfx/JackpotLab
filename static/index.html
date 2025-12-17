@@ -16,7 +16,7 @@
         .powerball {
             @apply bg-red-600 text-white shadow;
         }
-        .hot { @apply ring-2 ring-orange-500; }
+        .hot { @apply ring-2 ring-red-500; }
         .cold { @apply ring-2 ring-blue-500; }
         .overdue { @apply ring-2 ring-purple-500; }
 
@@ -1426,7 +1426,7 @@
             <!-- Color Legend -->
             <div class="flex items-center justify-center gap-6 mb-6 py-3 px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
                 <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full bg-orange-500"></span>
+                    <span class="w-4 h-4 rounded-full bg-red-500"></span>
                     <span class="text-sm font-medium text-gray-700">Hot (Above Expected)</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -1442,7 +1442,7 @@
                 <!-- Hot White Balls -->
                 <div class="stat-card">
                     <h3 class="text-lg font-bold mb-4 flex items-center">
-                        <span class="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
+                        <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
                         Hot White Balls
                     </h3>
                     <div id="hot-white" class="flex flex-wrap gap-2"></div>
@@ -1497,10 +1497,9 @@
             <!-- Frequency Chart -->
             <div class="stat-card mt-6">
                 <h3 class="text-lg font-bold mb-4">Number Frequency Distribution</h3>
-                <canvas id="frequencyChart" height="100"></canvas>
-                <div class="flex items-center justify-center gap-6 mt-4 py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="flex items-center justify-center gap-6 mb-4 py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded" style="background: rgba(249, 115, 22, 0.8);"></span>
+                        <span class="w-5 h-5 rounded" style="background: rgba(239, 68, 68, 0.8);"></span>
                         <span class="text-gray-700 font-medium">Hot (Above Expected)</span>
                     </div>
                     <div class="flex items-center gap-2">
@@ -1512,6 +1511,7 @@
                         <span class="text-gray-700 font-medium">Cold (Below Expected)</span>
                     </div>
                 </div>
+                <canvas id="frequencyChart" height="100"></canvas>
             </div>
         </div>
 
@@ -2210,9 +2210,9 @@
                 </div>
             `).join('');
 
-            // Powerballs - both in circles (orange = hot, blue = cold)
+            // Powerballs - both in circles (red = hot, blue = cold)
             document.getElementById('hot-pb').innerHTML = analysisData.hot_pb.slice(0, 5).map(n => `
-                <div class="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-bold">${n.number}</div>
+                <div class="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center text-sm font-bold">${n.number}</div>
             `).join('');
 
             document.getElementById('cold-pb').innerHTML = analysisData.cold_pb.slice(0, 5).map(n => `
@@ -2264,7 +2264,7 @@
                         label: 'Actual Frequency',
                         data: data.white_balls.map(d => d.count),
                         backgroundColor: data.white_balls.map(d =>
-                            d.diff_pct > 5 ? 'rgba(249, 115, 22, 0.7)' :
+                            d.diff_pct > 5 ? 'rgba(239, 68, 68, 0.7)' :
                             d.diff_pct < -5 ? 'rgba(59, 130, 246, 0.7)' :
                             'rgba(156, 163, 175, 0.7)'
                         ),
