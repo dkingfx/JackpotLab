@@ -694,26 +694,37 @@
 
         /* Action Footer Styles */
         .action-footer {
-            background: white;
+            background: #ffffff;
             border-top: 1px solid #e5e7eb;
             padding: 10px 24px;
-            display: flex;
+            display: flex !important;
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            flex-shrink: 0;
-            /* Not fixed - stays in flex flow */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 9999;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
 
         .action-btn {
-            padding: 12px 32px;
-            border-radius: 8px;
+            padding: 8px 20px;
+            border-radius: 6px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             border: none;
+            outline: none;
+            white-space: nowrap;
             transition: all 0.2s;
+        }
+
+        .action-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
         }
 
         .action-btn.primary {
@@ -828,12 +839,42 @@
             font-weight: 500;
         }
 
+        /* Hide mobile action bar on desktop */
+        .mobile-action-bar {
+            display: none;
+        }
+
         @media (max-width: 640px) {
+            /* Hide desktop action footer on mobile */
             .action-footer {
-                flex-direction: row;
-                align-items: center;
-                gap: 12px;
+                display: none !important;
+            }
+            /* Mobile action bar styles */
+            .mobile-action-bar {
+                display: flex !important;
+                background: white;
                 padding: 8px 12px;
+                gap: 8px;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid #e5e7eb;
+                position: sticky;
+                top: 0;
+                z-index: 45;
+            }
+            .mobile-action-bar .action-btn {
+                padding: 8px 14px;
+                font-size: 12px;
+            }
+            .mobile-action-bar .backtest-group {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11px;
+            }
+            .mobile-action-bar .action-select {
+                padding: 6px 8px;
+                font-size: 11px;
             }
             .action-btn.primary {
                 width: auto;
@@ -1118,7 +1159,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
+<body class="bg-gray-100 min-h-screen">
     <!-- Header -->
     <header class="bg-gradient-to-r from-blue-800 to-red-700 text-white py-3 shadow-lg sticky top-0 z-50 flex-shrink-0">
         <div class="w-full px-4">
@@ -1165,8 +1206,23 @@
         </div>
     </header>
 
+    <!-- Mobile Action Bar (visible only on mobile) -->
+    <div class="mobile-action-bar">
+        <button onclick="generateTickets()" class="action-btn primary">Generate Tickets</button>
+        <div class="backtest-group">
+            <span class="text-gray-500 text-xs">Backtest:</span>
+            <select id="mobile-draws-select" class="action-select">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+            </select>
+            <button onclick="testAgainstDrawsFromMobile()" class="action-btn secondary">Run</button>
+        </div>
+    </div>
+
     <!-- Main Content -->
-    <main class="w-full px-4 py-4 flex-1 min-h-0 overflow-y-auto flex flex-col">
+    <main class="w-full px-4 py-4 pb-20">
         <!-- Mobile Nav Toggle -->
         <button
             type="button"
@@ -1418,18 +1474,22 @@
             <!-- Frequency Chart -->
             <div class="stat-card mt-6">
                 <h3 class="text-lg font-bold mb-4">Number Frequency Distribution</h3>
-                <div id="chart-legend-extra" class="flex items-center justify-center gap-4 mb-2 text-xs text-gray-600">
-                    <div class="flex items-center gap-1">
-                        <span class="w-3 h-3 rounded-sm" style="background: rgba(239, 68, 68, 0.7);"></span>
-                        <span>Hot (Above Expected)</span>
+                <div id="chart-legend" class="flex items-center justify-center gap-5 mb-3 text-xs text-gray-700">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-10 h-3 rounded-sm" style="background: rgba(156, 163, 175, 0.7);"></span>
+                        <span>Actual Frequency</span>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <span class="w-3 h-3 rounded-sm" style="background: rgba(156, 163, 175, 0.7);"></span>
-                        <span>Normal</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-10 h-0.5" style="background: rgba(220, 38, 38, 0.8);"></span>
+                        <span>Expected (if random)</span>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <span class="w-3 h-3 rounded-sm" style="background: rgba(59, 130, 246, 0.7);"></span>
-                        <span>Cold (Below Expected)</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-10 h-3 rounded-sm" style="background: rgba(239, 68, 68, 0.7);"></span>
+                        <span>Hot</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-10 h-3 rounded-sm" style="background: rgba(59, 130, 246, 0.7);"></span>
+                        <span>Cold</span>
                     </div>
                 </div>
                 <canvas id="frequencyChart" height="100"></canvas>
@@ -1489,16 +1549,16 @@
                 <div class="stat-card">
                     <h2 class="text-xl font-bold mb-4">Prize Tiers</h2>
                     <div class="bg-gray-50 rounded-lg p-4">
-                        <ul class="space-y-1.5 text-sm text-gray-600">
-                            <li>5+PB: Jackpot (~$200M)</li>
-                            <li>5+0: $1,000,000</li>
-                            <li>4+PB: $50,000</li>
-                            <li>4+0: $100</li>
-                            <li>3+PB: $100</li>
-                            <li>3+0: $7</li>
-                            <li>2+PB: $7</li>
-                            <li>1+PB: $4</li>
-                            <li>0+PB: $4</li>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex justify-between"><span class="font-bold text-yellow-600">5+PB</span><span class="text-gray-800 font-semibold">Jackpot</span></li>
+                            <li class="flex justify-between"><span class="font-bold text-yellow-600">5+0</span><span class="text-gray-800 font-semibold">$1,000,000</span></li>
+                            <li class="flex justify-between"><span class="font-bold text-orange-500">4+PB</span><span class="text-gray-700">$50,000</span></li>
+                            <li class="flex justify-between"><span class="font-bold text-gray-700">4+0</span><span class="text-gray-600">$100</span></li>
+                            <li class="flex justify-between"><span class="font-bold text-gray-700">3+PB</span><span class="text-gray-600">$100</span></li>
+                            <li class="flex justify-between"><span class="font-bold text-gray-700">3+0</span><span class="text-gray-600">$7</span></li>
+                            <li class="flex justify-between"><span class="font-bold text-gray-700">2+PB</span><span class="text-gray-600">$7</span></li>
+                            <li class="flex justify-between"><span class="font-bold text-gray-700">1+PB</span><span class="text-gray-600">$4</span></li>
+                            <li class="flex justify-between"><span class="font-bold text-gray-700">0+PB</span><span class="text-gray-600">$4</span></li>
                         </ul>
                     </div>
                 </div>
@@ -1563,7 +1623,7 @@
                     <!-- Simulated Tickets -->
                     <div id="sim-tickets" class="mt-6 hidden">
                         <h4 class="font-bold mb-3 border-t pt-4">Sample Tickets (First 50)</h4>
-                        <div id="sim-tickets-container" class="tickets-grid max-h-96 overflow-y-auto"></div>
+                        <div id="sim-tickets-container" class="tickets-grid"></div>
                     </div>
                 </div>
             </div>
@@ -1583,13 +1643,13 @@
                         <option value="all">All Years</option>
                     </select>
                 </div>
-                <div id="history-container" class="grid grid-cols-3 gap-2 overflow-y-auto pr-2 flex-1"></div>
+                <div id="history-container" class="grid grid-cols-3 gap-2 pr-2"></div>
             </div>
         </div>
     </main>
 
     <!-- Action Footer -->
-    <div class="action-footer">
+    <div class="action-footer" style="position: fixed; bottom: 0; left: 0; right: 0; background: white; z-index: 9999; display: flex; padding: 10px 24px;">
         <button onclick="generateTickets()" class="action-btn primary">Generate Tickets</button>
 
         <div class="footer-row">
@@ -1612,11 +1672,9 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-gray-400 py-1 flex-shrink-0">
-        <div class="w-full px-4 text-center text-xs">
-            <span class="text-gray-500">Entertainment only. Not affiliated with Powerball. Gamble responsibly.</span>
-        </div>
+    <!-- Footer (hidden - disclaimer shown in action footer area) -->
+    <footer class="hidden">
+        <span>Entertainment only. Not affiliated with Powerball. Gamble responsibly.</span>
     </footer>
 
     <script>
@@ -2063,7 +2121,7 @@
                         <summary class="cursor-pointer font-medium text-blue-600 hover:text-blue-800 text-sm">
                             View All ${data.draws.length} Draw Results
                         </summary>
-                        <div class="mt-2 max-h-48 overflow-y-auto space-y-1">
+                        <div class="mt-2  space-y-1">
                             ${data.draws.map(d => `
                                 <div class="p-2 bg-white border border-gray-100 rounded flex justify-between items-center text-xs">
                                     <div>
@@ -2202,6 +2260,104 @@
             showTab('generator');
         }
 
+        // Test Against Draws from Mobile Action Bar
+        async function testAgainstDrawsFromMobile() {
+            if (currentTickets.length === 0) {
+                alert('Generate tickets first!');
+                return;
+            }
+
+            // Use the mobile action bar's dropdown value
+            const numDraws = parseInt(document.getElementById('mobile-draws-select').value);
+
+            // Sync with sidebar and footer dropdowns
+            const sidebarDropdown = document.getElementById('num-draws');
+            if (sidebarDropdown) {
+                sidebarDropdown.value = numDraws;
+            }
+            const footerDropdown = document.getElementById('action-draws-select');
+            if (footerDropdown) {
+                footerDropdown.value = numDraws;
+            }
+
+            // Call the API
+            const response = await fetch('/api/test-tickets', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    tickets: currentTickets.map(t => ({
+                        white_balls: t.white_balls,
+                        powerball: t.powerball
+                    })),
+                    num_draws: numDraws
+                })
+            });
+
+            const data = await response.json();
+            const summary = data.summary;
+
+            // Calculate values
+            const ticketCostPerDraw = summary.ticket_cost;
+            const totalCost = ticketCostPerDraw * summary.num_draws;
+            const totalWon = summary.total_won;
+            const netResult = totalWon - totalCost;
+            const roi = totalCost > 0 ? ((totalWon / totalCost) - 1) * 100 : 0;
+            const totalMatches = Object.values(summary.by_tier).reduce((sum, count) => sum + count, 0);
+
+            let html = `
+                <div class="test-results-panel">
+                    <div class="test-results-header">
+                        <h3>Backtesting Results</h3>
+                        <span class="draw-info">${currentTickets.length} tickets x ${summary.num_draws} draws</span>
+                    </div>
+                    <div class="test-results-grid">
+                        <div class="result-item">
+                            <div class="result-value spent">$${totalCost.toLocaleString()}</div>
+                            <div class="result-label">Total Spent</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value won ${totalWon > 0 ? 'positive' : 'zero'}">$${totalWon.toLocaleString()}</div>
+                            <div class="result-label">Total Won</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value net ${netResult >= 0 ? 'positive' : 'negative'}">${netResult >= 0 ? '+' : '-'}$${Math.abs(netResult).toLocaleString()}</div>
+                            <div class="result-label">Net P/L</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value roi ${roi >= 0 ? 'positive' : 'negative'}">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</div>
+                            <div class="result-label">ROI</div>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <span><strong>${summary.draws_with_winners}</strong>/${summary.num_draws} draws hit</span>
+                        <span><strong>${totalMatches}</strong> total matches</span>
+                    </div>
+            `;
+
+            if (Object.keys(summary.by_tier).length > 0) {
+                html += `
+                    <div class="prize-section">
+                        <h4>Prize Tier Matches</h4>
+                        <div class="prize-grid">
+                            ${Object.entries(summary.by_tier)
+                                .sort((a, b) => getPrizeTierOrder(a[0]) - getPrizeTierOrder(b[0]))
+                                .map(([tier, count]) => {
+                                    const prizeVal = getPrizeValue(tier);
+                                    const color = prizeVal >= 50000 ? 'green' : prizeVal >= 100 ? 'amber' : 'blue';
+                                    return `<span class="prize-tag ${color}">${tier} <span class="count">${count}x</span></span>`;
+                                }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+
+            document.getElementById('test-results-content').innerHTML = html;
+            document.getElementById('test-results').classList.remove('hidden');
+            showTab('generator');
+        }
+
         // Load Analysis
         async function loadAnalysis() {
             const response = await fetch('/api/analysis');
@@ -2303,7 +2459,7 @@
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { position: 'top' },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -2420,7 +2576,7 @@
                 if (winningDraws.length > 0) {
                     html += `
                         <div class="text-sm font-medium mb-2 text-green-600">${winningDraws.length} Winning Draw${winningDraws.length > 1 ? 's' : ''}!</div>
-                        <div class="space-y-2 max-h-48 overflow-y-auto">
+                        <div class="space-y-2 ">
                             ${winningDraws.map(w => `
                                 <div class="p-2 bg-green-50 rounded border border-green-200 text-xs">
                                     <div class="font-medium">${w.date} - ${w.tier}</div>
@@ -2482,71 +2638,60 @@
             const targetDraw = data.draws[0];  // Get the first draw from draws array
 
             let html = `
-                <!-- Target Draw -->
-                <div class="mb-4 p-4 bg-blue-50 rounded-lg">
-                    <div class="text-sm text-gray-600 mb-2">Tested Against Drawing:</div>
-                    <div class="font-bold text-lg mb-2">${targetDraw.date}</div>
-                    <div class="flex gap-2 items-center">
-                        ${targetDraw.white_balls.map(n => `<div class="ball white-ball text-sm">${n}</div>`).join('')}
-                        <div class="ball powerball text-sm">${targetDraw.powerball}</div>
-                    </div>
-                </div>
-
-                <!-- Profit/Loss Summary -->
-                <div class="grid grid-cols-3 gap-4 mb-6">
-                    <div class="text-center p-4 bg-gray-100 rounded-lg">
-                        <div class="text-2xl font-bold text-gray-800">$${summary.total_spent.toLocaleString()}</div>
-                        <div class="text-sm text-gray-500">Spent</div>
-                    </div>
-                    <div class="text-center p-4 bg-gray-100 rounded-lg">
-                        <div class="text-2xl font-bold ${summary.total_won > 0 ? 'text-green-600' : 'text-gray-400'}">$${summary.total_won.toLocaleString()}</div>
-                        <div class="text-sm text-gray-500">Won</div>
-                    </div>
-                    <div class="text-center p-4 ${isProfit ? 'bg-green-100' : 'bg-red-100'} rounded-lg">
-                        <div class="text-2xl font-bold ${isProfit ? 'text-green-600' : 'text-red-600'}">
-                            ${isProfit ? '+' : '-'}$${Math.abs(summary.profit_loss).toLocaleString()}
+                <!-- Compact Multi-Column Layout -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    <!-- Draw Info -->
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <div class="text-xs text-gray-500 mb-1">Drawing ${targetDraw.date}</div>
+                        <div class="flex gap-1 items-center flex-wrap">
+                            ${targetDraw.white_balls.map(n => `<span class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-xs font-bold">${n}</span>`).join('')}
+                            <span class="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">${targetDraw.powerball}</span>
                         </div>
-                        <div class="text-sm ${isProfit ? 'text-green-600' : 'text-red-600'}">${isProfit ? 'Profit' : 'Loss'}</div>
+                    </div>
+                    <!-- Spent -->
+                    <div class="p-3 bg-gray-100 rounded-lg text-center">
+                        <div class="text-xl font-bold text-gray-800">$${summary.total_spent.toLocaleString()}</div>
+                        <div class="text-xs text-gray-500">Spent</div>
+                    </div>
+                    <!-- Won -->
+                    <div class="p-3 bg-gray-100 rounded-lg text-center">
+                        <div class="text-xl font-bold ${summary.total_won > 0 ? 'text-green-600' : 'text-gray-400'}">$${summary.total_won.toLocaleString()}</div>
+                        <div class="text-xs text-gray-500">Won</div>
+                    </div>
+                    <!-- Profit/Loss -->
+                    <div class="p-3 ${isProfit ? 'bg-green-100' : 'bg-red-100'} rounded-lg text-center">
+                        <div class="text-xl font-bold ${isProfit ? 'text-green-600' : 'text-red-600'}">${isProfit ? '+' : '-'}$${Math.abs(summary.profit_loss).toLocaleString()}</div>
+                        <div class="text-xs ${isProfit ? 'text-green-600' : 'text-red-600'}">${isProfit ? 'Profit' : 'Loss'}</div>
                     </div>
                 </div>
 
-                <!-- ROI -->
-                <div class="mb-4 p-3 ${summary.roi >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border rounded-lg">
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium">Return on Investment (ROI)</span>
-                        <span class="text-xl font-bold ${summary.roi >= 0 ? 'text-green-600' : 'text-red-600'}">${summary.roi >= 0 ? '+' : ''}${summary.roi}%</span>
+                <!-- Stats Row -->
+                <div class="grid grid-cols-4 gap-3 mb-3">
+                    <div class="p-2 bg-gray-50 rounded text-center">
+                        <div class="text-sm font-bold">${summary.ticket_count}</div>
+                        <div class="text-xs text-gray-500">Tickets</div>
+                    </div>
+                    <div class="p-2 bg-gray-50 rounded text-center">
+                        <div class="text-sm font-bold ${targetDraw.winners > 0 ? 'text-green-600' : ''}">${targetDraw.winners}</div>
+                        <div class="text-xs text-gray-500">Winners</div>
+                    </div>
+                    <div class="p-2 ${summary.roi >= 0 ? 'bg-green-50' : 'bg-red-50'} rounded text-center">
+                        <div class="text-sm font-bold ${summary.roi >= 0 ? 'text-green-600' : 'text-red-600'}">${summary.roi >= 0 ? '+' : ''}${summary.roi}%</div>
+                        <div class="text-xs text-gray-500">ROI</div>
+                    </div>
+                    <div class="p-2 bg-gray-50 rounded">
+                        <div class="text-xs text-gray-500 mb-1">Prizes:</div>
+                        <div class="text-xs space-y-0.5">
+                            ${Object.keys(summary.by_tier).length > 0 ?
+                                Object.entries(summary.by_tier)
+                                    .filter(([tier, count]) => tier !== 'No Win')
+                                    .sort((a, b) => getPrizeTierOrder(a[0]) - getPrizeTierOrder(b[0]))
+                                    .map(([tier, count]) => `<div class="flex justify-between"><span>${tier}</span><span class="text-green-600">${count}x</span></div>`)
+                                    .join('')
+                                : '<span class="text-gray-400">None</span>'}
+                        </div>
                     </div>
                 </div>
-
-                <!-- Stats -->
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        <div class="text-lg font-bold">${summary.ticket_count.toLocaleString()}</div>
-                        <div class="text-sm text-gray-500">Tickets Purchased</div>
-                    </div>
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        <div class="text-lg font-bold ${targetDraw.winners > 0 ? 'text-green-600' : 'text-gray-400'}">${targetDraw.winners.toLocaleString()}</div>
-                        <div class="text-sm text-gray-500">Winning Tickets</div>
-                    </div>
-                </div>
-
-                <!-- Prize Breakdown -->
-                ${Object.keys(summary.by_tier).length > 0 ? `
-                <div class="mt-4">
-                    <h4 class="font-medium mb-2">Prize Breakdown:</h4>
-                    <div class="space-y-1">
-                        ${Object.entries(summary.by_tier)
-                            .filter(([tier, count]) => tier !== 'No Win')
-                            .sort((a, b) => getPrizeTierOrder(a[0]) - getPrizeTierOrder(b[0]))
-                            .map(([tier, count]) => `
-                                <div class="flex justify-between items-center text-sm p-2 bg-green-50 rounded">
-                                    <span class="font-medium">${tier}</span>
-                                    <span class="text-green-600">${count}x = $${(getPrizeValue(tier) * count).toLocaleString()}</span>
-                                </div>
-                            `).join('')}
-                    </div>
-                </div>
-                ` : ''}
             `;
 
             document.getElementById('sim-results').innerHTML = html;
