@@ -1991,33 +1991,14 @@
             }
 
             container.innerHTML = `
-                <div class="playslip-grid" style="grid-template-columns: repeat(${cols}, 1fr);">
-                    ${columns.map((colTickets, colIdx) => `
-                        <div class="playslip-column">
-                            <table class="playslip-table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Numbers</th>
-                                        <th>PB</th>
-                                        <th>Strategy</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${colTickets.map((t, i) => `
-                                        <tr>
-                                            <td class="playslip-row-num">${colIdx * perCol + i + 1}</td>
-                                            <td>
-                                                ${t.white_balls.map(n => `<span class="playslip-number playslip-white">${n}</span>`).join('')}
-                                            </td>
-                                            <td>
-                                                <span class="playslip-number playslip-red">${t.powerball}</span>
-                                            </td>
-                                            <td class="text-xs text-gray-500">${t.strategy || ''}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
+                <div id="tickets-list" class="space-y-2">
+                    ${currentTickets.map((t, i) => `
+                        <div class="flex items-center gap-1 p-1.5 bg-gray-50 rounded">
+                            <span class="text-gray-500 text-sm font-medium w-8 shrink-0">${i + 1}</span>
+                            <div class="flex items-center gap-1">
+                                ${t.white_balls.map(n => `<span class="history-ball white">${n}</span>`).join('')}
+                                <span class="history-ball red">${t.powerball}</span>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
