@@ -1333,6 +1333,7 @@
         let analysisData = null;
         let totalGeneratedTickets = 0;
         let totalGenerateClicks = 0;
+        let totalSessionCost = 0;
 
         // Mobile nav toggle
         function toggleMobileNav() {
@@ -1358,8 +1359,7 @@
         function updateSessionSummary() {
             const el = document.getElementById('session-ticket-summary');
             if (!el) return;
-            const totalCost = totalGeneratedTickets * 2;
-            el.textContent = `${totalGeneratedTickets} tickets | $${totalCost.toLocaleString()}`;
+            el.textContent = `${totalGeneratedTickets} tickets | $${totalSessionCost.toLocaleString()}`;
         }
 
         // Generate Tickets
@@ -1376,9 +1376,10 @@
             const data = await response.json();
             currentTickets = data.tickets;
 
-            // Update session counters
+            // Update session counters using API values
             totalGenerateClicks += 1;
             totalGeneratedTickets += data.count;
+            totalSessionCost += data.cost;
             updateSessionSummary();
 
             document.getElementById('tickets-count').textContent = `${data.count} tickets | $${data.cost}`;
