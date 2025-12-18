@@ -204,6 +204,24 @@
         .strategy-pairs { background: rgba(236,72,153,0.3); color: #f9a8d4; }
         .strategy-importance { background: rgba(234,179,8,0.3); color: #fde047; }
 
+        /* Save Ticket Button */
+        .save-ticket-btn {
+            position: absolute;
+            top: 6px;
+            left: 8px;
+            color: rgba(255,255,255,0.4);
+            transition: all 0.2s;
+            padding: 2px;
+            z-index: 10;
+        }
+        .save-ticket-btn:hover {
+            color: #fbbf24;
+            transform: scale(1.1);
+        }
+        .save-ticket-btn.saved {
+            color: #fbbf24;
+        }
+
         /* Tickets Grid with Historical Winners Column */
         .tickets-wrapper {
             display: grid;
@@ -1499,6 +1517,7 @@
             <button id="mobile-tab-analysis" onclick="showTab('analysis')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Analysis</button>
             <button id="mobile-tab-simulator" onclick="showTab('simulator')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Jackpot Simulator</button>
             <button id="mobile-tab-history" onclick="showTab('history')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Recent Draws</button>
+            <button id="mobile-tab-saved" onclick="showTab('saved')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">Saved Tickets</button>
         </div>
     </div>
 
@@ -1562,6 +1581,9 @@
         </button>
         <button onclick="showTab('history')" id="tab-history" class="tab-btn">
             <span>Recent Draws</span>
+        </button>
+        <button onclick="showTab('saved')" id="tab-saved" class="tab-btn">
+            <span>Saved Tickets</span>
         </button>
     </nav>
 
@@ -2081,6 +2103,32 @@
             </div>
         </div>
 
+        <!-- Saved Tickets Tab -->
+        <div id="content-saved" class="tab-content hidden">
+            <div class="stat-card">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-bold">Saved Tickets</h2>
+                        <p class="text-xs sm:text-sm text-gray-500">Tickets saved for the upcoming draw</p>
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <span id="saved-tickets-count" class="text-gray-500 font-medium text-sm"></span>
+                        <button onclick="clearSavedTickets()" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm">
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+                <div id="saved-tickets-container" class="tickets-grid"></div>
+                <div id="saved-empty-state" class="text-center py-12 text-gray-500">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                    </svg>
+                    <p class="font-medium">No saved tickets yet</p>
+                    <p class="text-sm mt-1">Generate tickets and click the bookmark icon to save them here</p>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- Disclaimer Footer -->
@@ -2111,7 +2159,8 @@
             'tickets': 'Tickets',
             'analysis': 'Analysis',
             'simulator': 'Jackpot Simulator',
-            'history': 'Recent Draws'
+            'history': 'Recent Draws',
+            'saved': 'Saved Tickets'
         };
 
         function showTab(tab) {
@@ -2139,7 +2188,116 @@
 
             if (tab === 'analysis' && !analysisData) loadAnalysis();
             if (tab === 'history') loadHistory();
+            if (tab === 'saved') renderSavedTickets();
         }
+
+        // ========== SAVED TICKETS FUNCTIONS ==========
+        const SAVED_TICKETS_KEY = 'jackpotsim_saved_tickets';
+
+        function loadSavedTickets() {
+            const saved = localStorage.getItem(SAVED_TICKETS_KEY);
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function persistSavedTickets(tickets) {
+            localStorage.setItem(SAVED_TICKETS_KEY, JSON.stringify(tickets));
+        }
+
+        function saveTicket(index) {
+            const ticket = currentTickets[index];
+            if (!ticket) return;
+
+            const savedTickets = loadSavedTickets();
+
+            // Check for duplicates
+            const isDuplicate = savedTickets.some(t =>
+                JSON.stringify(t.white_balls) === JSON.stringify(ticket.white_balls) &&
+                t.powerball === ticket.powerball
+            );
+
+            if (isDuplicate) {
+                alert('This ticket is already saved!');
+                return;
+            }
+
+            savedTickets.push({
+                white_balls: ticket.white_balls,
+                powerball: ticket.powerball,
+                strategy: ticket.strategy,
+                savedAt: new Date().toISOString()
+            });
+
+            persistSavedTickets(savedTickets);
+
+            // Visual feedback - mark button as saved
+            const btn = document.querySelector(`[data-save-index="${index}"]`);
+            if (btn) {
+                btn.classList.add('saved');
+                btn.title = 'Saved!';
+            }
+
+            // Update count display if on saved tab
+            renderSavedTickets();
+        }
+
+        function removeSavedTicket(index) {
+            const savedTickets = loadSavedTickets();
+            savedTickets.splice(index, 1);
+            persistSavedTickets(savedTickets);
+            renderSavedTickets();
+        }
+
+        function clearSavedTickets() {
+            const savedTickets = loadSavedTickets();
+            if (savedTickets.length === 0) return;
+
+            if (confirm('Clear all saved tickets?')) {
+                localStorage.removeItem(SAVED_TICKETS_KEY);
+                renderSavedTickets();
+            }
+        }
+
+        function renderSavedTickets() {
+            const savedTickets = loadSavedTickets();
+            const container = document.getElementById('saved-tickets-container');
+            const emptyState = document.getElementById('saved-empty-state');
+            const countEl = document.getElementById('saved-tickets-count');
+
+            if (!container) return;
+
+            if (savedTickets.length === 0) {
+                container.textContent = '';
+                if (emptyState) emptyState.classList.remove('hidden');
+                if (countEl) countEl.textContent = '';
+                return;
+            }
+
+            if (emptyState) emptyState.classList.add('hidden');
+            if (countEl) countEl.textContent = savedTickets.length + ' ticket' + (savedTickets.length > 1 ? 's' : '') + ' saved';
+
+            const ticketsHtml = savedTickets.map((t, i) => {
+                const ballsHtml = t.white_balls.map(n => '<div class="ticket-ball white">' + n + '</div>').join('');
+                return '<div class="ticket-card">' +
+                    '<button onclick="removeSavedTicket(' + i + ')" class="save-ticket-btn" title="Remove ticket">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
+                        '</svg>' +
+                    '</button>' +
+                    '<div class="ticket-number">TICKET #' + String(i + 1).padStart(3, '0') + '</div>' +
+                    '<div class="ticket-balls">' + ballsHtml +
+                        '<div class="ticket-ball red">' + t.powerball + '</div>' +
+                    '</div>' +
+                    '<div class="ticket-divider"></div>' +
+                    '<div class="ticket-footer">' +
+                        '<span class="ticket-strategy ' + getStrategyClass(t.strategy) + '">' + formatStrategy(t.strategy) + '</span>' +
+                        '<span class="ticket-price">$2.00</span>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+
+            container.innerHTML = ticketsHtml;
+        }
+        // ========== END SAVED TICKETS FUNCTIONS ==========
 
         function handleTicketInput(inputEl) {
             const value = inputEl.value;
@@ -2291,6 +2449,11 @@
             const container = document.getElementById('tickets-container');
             container.innerHTML = `<div class="tickets-grid">${nonMatchingTickets.map(t => `
                 <div class="ticket-card">
+                    <button onclick="saveTicket(${t._index})" data-save-index="${t._index}" class="save-ticket-btn" title="Save ticket">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                        </svg>
+                    </button>
                     <div class="ticket-number">TICKET #${String(t._index+1).padStart(3, '0')}</div>
                     <div class="ticket-balls">
                         ${t.white_balls.map(n => `<div class="ticket-ball white">${n}</div>`).join('')}
@@ -2363,6 +2526,11 @@
                 // Render matching tickets in sidebar content
                 sidebarContent.innerHTML = matchingTickets.map(t => `
                     <div class="ticket-card mb-3" style="border: 2px solid #fbbf24;">
+                        <button onclick="saveTicket(${t._index})" data-save-index="${t._index}" class="save-ticket-btn" title="Save ticket">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                            </svg>
+                        </button>
                         <div class="ticket-number">TICKET #${String(t._index+1).padStart(3, '0')}</div>
                         <div class="ticket-balls">
                             ${t.white_balls.map(n => `<div class="ticket-ball white">${n}</div>`).join('')}
