@@ -1679,41 +1679,6 @@
                             </div>
                             <button onclick="testAgainstDrawsFromMobile()" class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Run Backtest</button>
                         </div>
-                        <!-- Jackpot Chase - Mobile Only (Desktop uses sidebar) -->
-                        <div id="session-tracker" class="session-tracker mobile-only-sidebar">
-                            <div class="session-tracker-header">
-                                <div class="session-tracker-title">
-                                    <span>💰</span> Jackpot Chase
-                                </div>
-                                <span class="session-tracker-reset" onclick="resetSessionStats()">Reset</span>
-                            </div>
-                            <div class="session-stats-grid">
-                                <div class="session-stat">
-                                    <div id="session-tickets" class="session-stat-value">0</div>
-                                    <div class="session-stat-label">Tickets</div>
-                                </div>
-                                <div class="session-stat">
-                                    <div id="session-spent" class="session-stat-value spent">$0</div>
-                                    <div class="session-stat-label">Spent</div>
-                                </div>
-                                <div class="session-stat">
-                                    <div id="session-won" class="session-stat-value won">$0</div>
-                                    <div class="session-stat-label">Won</div>
-                                </div>
-                            </div>
-                            <div class="session-milestone">
-                                <div class="milestone-header">
-                                    <span class="milestone-label">🏆 Road to Millionaire</span>
-                                    <span id="milestone-value" class="milestone-value">$0 / $1,000,000</span>
-                                </div>
-                                <div class="milestone-bar">
-                                    <div id="milestone-progress" class="milestone-progress" style="width: 0%"></div>
-                                </div>
-                            </div>
-                            <div class="session-clicks">
-                                Generate clicks: <span id="session-clicks-count">0</span>
-                            </div>
-                        </div>
                         <!-- Match Counter - Mobile Only -->
                         <div id="match-counter" class="mobile-only-sidebar hidden text-center py-2 px-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg">
                             <span id="match-counter-text" class="text-sm font-bold text-yellow-700"></span>
@@ -1758,42 +1723,6 @@
 
                 <!-- Desktop Right Sidebar -->
                 <div class="desktop-right-sidebar">
-                    <!-- Jackpot Chase - Desktop -->
-                    <div id="session-tracker-desktop" class="session-tracker active">
-                        <div class="session-tracker-header">
-                            <div class="session-tracker-title">
-                                <span>💰</span> Jackpot Chase
-                            </div>
-                            <span class="session-tracker-reset" onclick="resetSessionStats()">Reset</span>
-                        </div>
-                        <div class="session-stats-grid">
-                            <div class="session-stat">
-                                <div id="session-tickets-desktop" class="session-stat-value">0</div>
-                                <div class="session-stat-label">Tickets</div>
-                            </div>
-                            <div class="session-stat">
-                                <div id="session-spent-desktop" class="session-stat-value spent">$0</div>
-                                <div class="session-stat-label">Spent</div>
-                            </div>
-                            <div class="session-stat">
-                                <div id="session-won-desktop" class="session-stat-value won">$0</div>
-                                <div class="session-stat-label">Won</div>
-                            </div>
-                        </div>
-                        <div class="session-milestone">
-                            <div class="milestone-header">
-                                <span class="milestone-label">🏆 Road to Millionaire</span>
-                                <span id="milestone-value-desktop" class="milestone-value">$0 / $1,000,000</span>
-                            </div>
-                            <div class="milestone-bar">
-                                <div id="milestone-progress-desktop" class="milestone-progress" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <div class="session-clicks">
-                            Generate clicks: <span id="session-clicks-count-desktop">0</span>
-                        </div>
-                    </div>
-
                     <!-- Match Counter - Desktop -->
                     <div id="match-counter-desktop" class="hidden text-center py-2 px-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg">
                         <span id="match-counter-text-desktop" class="text-sm font-bold text-yellow-700"></span>
@@ -1971,9 +1900,14 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Strategy</label>
                         <select id="sim-strategy" class="w-full border rounded-lg px-4 py-2">
                             <option value="mixed">Mixed (All Strategies)</option>
-                            <option value="importance">Importance Sampling</option>
-                            <option value="frequency">Frequency Weighted</option>
-                            <option value="hybrid">Hybrid</option>
+                            <option value="importance">Importance Sampling (Balanced)</option>
+                            <option value="importance_hot">Importance Sampling (Hot Biased)</option>
+                            <option value="importance_due">Importance Sampling (Due Biased)</option>
+                            <option value="hybrid">Hybrid (Hot + Overdue)</option>
+                            <option value="frequency">Frequency Weighted (Hot Numbers)</option>
+                            <option value="overdue">Overdue Weighted (Due Numbers)</option>
+                            <option value="pattern">Pattern Optimized</option>
+                            <option value="pairs">Pair Based</option>
                             <option value="random">Pure Random</option>
                         </select>
                     </div>
@@ -1995,21 +1929,39 @@
                     </button>
                 </div>
 
-                <!-- Prize Tiers (Center) -->
-                <div class="stat-card">
-                    <h2 class="text-xl font-bold mb-4">Prize Tiers</h2>
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <ul class="space-y-2 text-sm">
-                            <li class="flex justify-between"><span class="font-bold text-yellow-600">5+PB</span><span class="text-gray-800 font-semibold">Jackpot</span></li>
-                            <li class="flex justify-between"><span class="font-bold text-yellow-600">5+0</span><span class="text-gray-800 font-semibold">$1,000,000</span></li>
-                            <li class="flex justify-between"><span class="font-bold text-orange-500">4+PB</span><span class="text-gray-700">$50,000</span></li>
-                            <li class="flex justify-between"><span class="font-bold text-gray-700">4+0</span><span class="text-gray-600">$100</span></li>
-                            <li class="flex justify-between"><span class="font-bold text-gray-700">3+PB</span><span class="text-gray-600">$100</span></li>
-                            <li class="flex justify-between"><span class="font-bold text-gray-700">3+0</span><span class="text-gray-600">$7</span></li>
-                            <li class="flex justify-between"><span class="font-bold text-gray-700">2+PB</span><span class="text-gray-600">$7</span></li>
-                            <li class="flex justify-between"><span class="font-bold text-gray-700">1+PB</span><span class="text-gray-600">$4</span></li>
-                            <li class="flex justify-between"><span class="font-bold text-gray-700">0+PB</span><span class="text-gray-600">$4</span></li>
-                        </ul>
+                <!-- Jackpot Chase (Center) -->
+                <div id="sim-session-tracker" class="session-tracker active">
+                    <div class="session-tracker-header">
+                        <div class="session-tracker-title">
+                            <span>💰</span> Jackpot Chase
+                        </div>
+                        <span class="session-tracker-reset" onclick="resetSimSessionStats()">Reset</span>
+                    </div>
+                    <div class="session-stats-grid">
+                        <div class="session-stat">
+                            <div id="sim-session-tickets" class="session-stat-value">0</div>
+                            <div class="session-stat-label">Tickets</div>
+                        </div>
+                        <div class="session-stat">
+                            <div id="sim-session-spent" class="session-stat-value spent">$0</div>
+                            <div class="session-stat-label">Spent</div>
+                        </div>
+                        <div class="session-stat">
+                            <div id="sim-session-won" class="session-stat-value won">$0</div>
+                            <div class="session-stat-label">Won</div>
+                        </div>
+                    </div>
+                    <div class="session-milestone">
+                        <div class="milestone-header">
+                            <span class="milestone-label">🏆 Road to Millionaire</span>
+                            <span id="sim-milestone-value" class="milestone-value">$0 / $1,000,000</span>
+                        </div>
+                        <div class="milestone-bar">
+                            <div id="sim-milestone-progress" class="milestone-progress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="session-clicks">
+                        Simulations run: <span id="sim-session-clicks-count">0</span>
                     </div>
                 </div>
 
@@ -2139,6 +2091,12 @@
         let totalGenerateClicks = 0;
         let totalSessionCost = 0;
         let totalSessionWinnings = 0;
+
+        // Simulation session tracking
+        let simTotalTickets = 0;
+        let simTotalSpent = 0;
+        let simTotalWon = 0;
+        let simRunCount = 0;
 
         // Mobile nav toggle
         function toggleMobileNav() {
@@ -2383,6 +2341,46 @@
             const trackerDesktop = document.getElementById('session-tracker-desktop');
             if (tracker) tracker.classList.remove('active');
             if (trackerDesktop) trackerDesktop.classList.remove('active');
+        }
+
+        // Simulation Jackpot Chase functions
+        function updateSimSessionSummary() {
+            // Update tickets count
+            const ticketsEl = document.getElementById('sim-session-tickets');
+            if (ticketsEl) ticketsEl.textContent = simTotalTickets.toLocaleString();
+
+            // Update spent
+            const spentEl = document.getElementById('sim-session-spent');
+            if (spentEl) spentEl.textContent = '$' + simTotalSpent.toLocaleString();
+
+            // Update won
+            const wonEl = document.getElementById('sim-session-won');
+            if (wonEl) {
+                wonEl.textContent = '$' + simTotalWon.toLocaleString();
+                // Color the won amount green if positive
+                wonEl.classList.toggle('positive', simTotalWon > 0);
+            }
+
+            // Update milestone progress (Road to Millionaire)
+            const milestoneValueEl = document.getElementById('sim-milestone-value');
+            const milestoneProgressEl = document.getElementById('sim-milestone-progress');
+            if (milestoneValueEl && milestoneProgressEl) {
+                const progressPct = Math.min((simTotalWon / 1000000) * 100, 100);
+                milestoneValueEl.textContent = '$' + simTotalWon.toLocaleString() + ' / $1,000,000';
+                milestoneProgressEl.style.width = progressPct + '%';
+            }
+
+            // Update simulation run count
+            const clicksEl = document.getElementById('sim-session-clicks-count');
+            if (clicksEl) clicksEl.textContent = simRunCount;
+        }
+
+        function resetSimSessionStats() {
+            simTotalTickets = 0;
+            simTotalSpent = 0;
+            simTotalWon = 0;
+            simRunCount = 0;
+            updateSimSessionSummary();
         }
 
         function validateTicketInput(inputEl) {
@@ -3087,6 +3085,15 @@
                 });
 
                 const data = await response.json();
+
+                // Update simulation Jackpot Chase stats
+                const summary = data.summary;
+                simTotalTickets += summary.ticket_count;
+                simTotalSpent += summary.total_spent;
+                simTotalWon += summary.total_won;
+                simRunCount++;
+                updateSimSessionSummary();
+
                 displaySimulationResults(data);
             } catch (e) {
                 document.getElementById('sim-results').innerHTML = `<p class="text-red-600">Error: ${e.message}</p>`;
