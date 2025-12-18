@@ -90,15 +90,25 @@
         }
 
         /* Lottery Ticket Card Styles */
+        /* Card Container System */
+        :root {
+            --card-min-width: 160px;
+            --card-max-width: 280px;
+            --card-gap: 16px;
+            --ball-size: 32px;
+            --powerball-size: 36px;
+        }
+
         .ticket-card {
             background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%);
             border-radius: 10px;
-            padding: 14px 20px;
+            padding: 12px 14px;
             position: relative;
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.25);
             border: 1px solid rgba(255,255,255,0.1);
-            max-width: 270px;
+            min-width: var(--card-min-width);
+            max-width: var(--card-max-width);
             width: 100%;
         }
 
@@ -233,9 +243,26 @@
         .tickets-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            gap: var(--card-gap);
             padding: 4px;
             justify-content: center;
+        }
+
+        /* Right Sidebar Container System */
+        .desktop-right-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: var(--card-gap);
+            width: 280px;
+            min-width: 260px;
+            max-width: 320px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-card {
+            border-radius: 10px;
+            padding: 16px;
+            width: 100%;
         }
 
         /* Historical Winners Sidebar - Always visible */
