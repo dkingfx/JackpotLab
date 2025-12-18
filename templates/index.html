@@ -6,6 +6,7 @@
     <title>JackpotSIM - Powerball Number Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         .ball {
             @apply w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg;
@@ -1612,9 +1613,8 @@
                             <h2 class="text-xl font-bold">Quick Ticket View</h2>
                             <p class="text-xs text-gray-500">See all tickets in the "Tickets" tab for easy printing</p>
                         </div>
-                        <div class="flex flex-col items-end">
+                        <div class="flex flex-col items-end md:hidden">
                             <span id="tickets-count" class="text-gray-500 font-medium text-center"></span>
-                            <div id="tickets-tier-breakdown" class="text-sm"></div>
                         </div>
                     </div>
                     <div class="tickets-wrapper">
@@ -1718,6 +1718,15 @@
 
                 <!-- Desktop Right Sidebar -->
                 <div class="desktop-right-sidebar">
+                    <!-- Ticket Batch Info -->
+                    <div id="tickets-batch-info-desktop" class="bg-white rounded-xl shadow-lg p-4 border border-blue-100 flex justify-between items-center mb-0">
+                         <div class="flex items-center gap-2">
+                            <span class="text-xl">🎟️</span>
+                            <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">Current Batch</span>
+                         </div>
+                         <span id="tickets-count-desktop" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg border border-blue-100"></span>
+                    </div>
+
                     <!-- Jackpot Chase - Desktop -->
                     <div id="session-tracker-desktop" class="session-tracker active">
                         <div class="session-tracker-header">
@@ -2370,28 +2379,50 @@
             totalGeneratedTickets += data.count;
             totalSessionCost += data.cost;
 
-            document.getElementById('tickets-count').textContent = `${data.count} tickets | $${data.cost}`;
+            const ticketsCountEl = document.getElementById('tickets-count');
+            if (ticketsCountEl) ticketsCountEl.textContent = `${data.count} tickets | $${data.cost}`;
+            
+            const ticketsCountDesktopEl = document.getElementById('tickets-count-desktop');
+            if (ticketsCountDesktopEl) ticketsCountDesktopEl.textContent = `${data.count} tickets | $${data.cost}`;
 
             // Separate matching and non-matching tickets & calculate winnings
             const matchingTickets = [];
             const nonMatchingTickets = [];
             let batchWinnings = 0;
+            let hasBigWin = false;
+
             data.tickets.forEach((t, i) => {
                 t._index = i; // Store original index
                 if (t.historical_match) {
                     matchingTickets.push(t);
                     // Parse prize value and add to winnings
                     const prize = t.historical_match.prize;
+                    let prizeVal = 0;
+                    
                     if (prize === 'JACKPOT') {
                         batchWinnings += 200000000; // $200M jackpot estimate
+                        prizeVal = 200000000;
                     } else {
                         const prizeNum = parseInt(prize.replace(/[$,]/g, ''), 10);
-                        if (!isNaN(prizeNum)) batchWinnings += prizeNum;
+                        if (!isNaN(prizeNum)) {
+                            batchWinnings += prizeNum;
+                            prizeVal = prizeNum;
+                        }
+                    }
+
+                    // Check for big win (>= $1M)
+                    if (prize === 'JACKPOT' || prizeVal >= 1000000) {
+                        hasBigWin = true;
                     }
                 } else {
                     nonMatchingTickets.push(t);
                 }
             });
+
+            if (hasBigWin) {
+                triggerBigWinConfetti();
+            }
+
             totalSessionWinnings += batchWinnings;
             updateSessionSummary();
 
@@ -2417,6 +2448,15 @@
                 </div>
             `).join('')}</div>`;
 
+            // Sort matching tickets: Jackpot first, then by value
+            matchingTickets.sort((a, b) => {
+                const getVal = (t) => {
+                    if (t.historical_match.prize === 'JACKPOT') return 999999999; // Highest
+                    return parseInt(t.historical_match.prize.replace(/[$,]/g, ''), 10) || 0;
+                };
+                return getVal(b) - getVal(a);
+            });
+
             // Show mobile backtest section and disclaimer after tickets are generated (mobile only)
             const mobileBacktest = document.getElementById('mobile-backtest-section');
             if (mobileBacktest) {
@@ -2439,7 +2479,6 @@
             // Handle historical matches sidebar (both mobile and desktop)
             const historicalContent = document.getElementById('historical-matches-content');
             const historicalContentDesktop = document.getElementById('historical-matches-content-desktop');
-            const tierBreakdownEl = document.getElementById('tickets-tier-breakdown');
             const matchCount = matchingTickets.length;
 
             if (matchCount > 0) {
@@ -2455,8 +2494,6 @@
                 if (tierCounts['JACKPOT'] > 0) tierLabels.push(`<span class="text-yellow-500">${tierCounts['JACKPOT']}× 🏆</span>`);
                 if (tierCounts['5+0'] > 0) tierLabels.push(`<span class="text-green-500">${tierCounts['5+0']}× ⭐</span>`);
                 if (tierCounts['4+PB'] > 0) tierLabels.push(`<span class="text-blue-500">${tierCounts['4+PB']}× 🎯</span>`);
-
-                tierBreakdownEl.innerHTML = `<span class="text-yellow-600 font-bold">${matchCount} match${matchCount > 1 ? 'es' : ''}!</span>`;
 
                 // Update match counter between cards
                 const matchCounter = document.getElementById('match-counter');
@@ -2601,23 +2638,58 @@
         }
 
         function renderHistoricalMatch(match) {
-            const matchClass = match.match_type === 'JACKPOT' ? 'match-jackpot' :
-                              match.match_type === '5+0' ? 'match-million' : 'match-50k';
-            const icon = match.match_type === 'JACKPOT' ? '🏆' :
-                        match.match_type === '5+0' ? '⭐' : '🎯';
+            const types = {
+                'JACKPOT': {
+                    label: 'JACKPOT',
+                    style: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                },
+                '5+0': {
+                    label: 'MATCH 5',
+                    style: 'bg-green-100 text-green-800 border-green-200'
+                },
+                '4+PB': {
+                    label: 'MATCH 4+PB',
+                    style: 'bg-blue-100 text-blue-800 border-blue-200'
+                }
+            };
+            const type = types[match.match_type] || types['4+PB'];
 
             return `
-                <div class="historical-match ${matchClass}">
-                    <div>
-                        <span class="match-icon">${icon}</span>
-                        <span class="match-title">Historical Match</span>
+                <div class="mt-2 p-2 rounded text-xs border ${type.style}">
+                    <div class="flex justify-between items-center font-bold">
+                        <span>${type.label}</span>
+                        <span>${match.prize}</span>
                     </div>
-                    <div class="match-details">
-                        Won <span class="match-prize">${match.prize}</span> on ${match.date}
-                        <br>${match.white_matches} white balls${match.powerball_match ? ' + Powerball' : ''}
+                    <div class="text-[10px] mt-1 opacity-75">
+                        Matched on ${match.date}
+                        <br>
+                        (${match.white_matches} white balls ${match.powerball_match ? '+ Powerball' : ''})
                     </div>
                 </div>
             `;
+        }
+
+        function triggerBigWinConfetti() {
+            var duration = 5 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            var random = function(min, max) {
+              return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+              var timeLeft = animationEnd - Date.now();
+
+              if (timeLeft <= 0) {
+                return clearInterval(interval);
+              }
+
+              var particleCount = 50 * (timeLeft / duration);
+              // since particles fall down, start a bit higher than random
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 } }));
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
         }
 
         function getStrategyColor(strategy) {
