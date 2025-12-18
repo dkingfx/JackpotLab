@@ -2686,7 +2686,7 @@
 
         function triggerBigWinConfetti(duration = 5000) {
             var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
 
             var random = function(min, max) {
               return Math.random() * (max - min) + min;
