@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>JackpotSIM - Powerball Number Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -813,6 +813,10 @@
         }
 
         @media (max-width: 768px) {
+            .mobile-nav-wrapper {
+                padding-top: env(safe-area-inset-top, 0px);
+                background: white;
+            }
             .mobile-nav-toggle {
                 display: inline-flex;
                 width: 100%;
