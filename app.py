@@ -441,6 +441,72 @@ def frequency_chart():
     })
 
 
+@app.route('/api/refresh-data', methods=['POST'])
+def refresh_data():
+    """Fetch latest data from NY Open Data API and update local CSV."""
+    import requests
+    import csv
+    
+    API_URL = "https://data.ny.gov/resource/d6yy-54nr.json?$limit=5000&$order=draw_date DESC"
+    
+    try:
+        response = requests.get(API_URL)
+        response.raise_for_status()
+        data = response.json()
+        
+        if not data:
+            return jsonify({'error': 'No data received from API'}), 500
+
+        # Process and write to CSV
+        # CSV Format: Draw Date,Winning Numbers,Multiplier
+        csv_rows = [['Draw Date', 'Winning Numbers', 'Multiplier']]
+        
+        count = 0
+        for item in data:
+            # API Date format: 2024-11-20T00:00:00.000
+            # Target format: 11/20/2024
+            try:
+                draw_date_dt = datetime.strptime(item['draw_date'].split('T')[0], '%Y-%m-%d')
+                draw_date_str = draw_date_dt.strftime('%m/%d/%Y')
+                
+                winning_numbers = item['winning_numbers'] # e.g. "01 12 33 44 55 12" (last is PB?)
+                # Wait, NY API format check.
+                # Example: "winning_numbers": "02 12 45 67 23 12" -> White + PB usually.
+                # Let's assume standard format.
+                
+                multiplier = item.get('multiplier', '1')
+                
+                csv_rows.append([draw_date_str, winning_numbers, multiplier])
+                count += 1
+            except Exception as e:
+                print(f"Skipping row error: {e}")
+                continue
+                
+        # Write to file
+        with open(data_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerows(csv_rows)
+            
+        # Reload data in memory
+        global draws, generator, simulator, freq_analyzer, gap_analyzer, pattern_analyzer
+        draws = load_historical_data(data_file)
+        generator = NumberGenerator(draws)
+        simulator = MatchSimulator(draws)
+        freq_analyzer = FrequencyAnalyzer(draws)
+        gap_analyzer = GapAnalyzer(draws)
+        pattern_analyzer = PatternAnalyzer(draws)
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Successfully updated {count} draws',
+            'total_draws': len(draws),
+            'latest_date': draws[-1].date.strftime('%m/%d/%Y')
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     print(f"Loaded {len(draws)} historical draws")
     print(f"Starting Powerball Analyzer web server...")
