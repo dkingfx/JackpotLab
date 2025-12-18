@@ -225,7 +225,6 @@
                 grid-template-columns: 1fr;
             }
             .historical-sidebar {
-                order: -1;
                 min-width: unset;
             }
         }
@@ -296,7 +295,6 @@
                 grid-template-columns: 1fr;
             }
             .historical-sidebar {
-                order: -1;
                 min-width: unset;
             }
             .tickets-grid {
@@ -592,6 +590,191 @@
         }
         .session-label {
             font-weight: 500;
+        }
+
+        /* Session Tracker Styles - Jackpot Chase Game */
+        .session-tracker {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 16px;
+            color: white;
+            display: none;
+            border: 2px solid rgba(251, 191, 36, 0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .session-tracker.active {
+            display: block;
+        }
+        .session-tracker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .session-tracker-title {
+            font-size: 18px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .session-tracker-title span {
+            -webkit-text-fill-color: initial;
+            background: none;
+        }
+        .session-tracker-reset {
+            font-size: 11px;
+            color: #64748b;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .session-tracker-reset:hover {
+            color: #f87171;
+            background: rgba(248,113,113,0.1);
+            border-color: rgba(248,113,113,0.3);
+        }
+        .session-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .session-stat {
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 12px 8px;
+        }
+        .session-stat-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: white;
+        }
+        .session-stat-value.spent { color: #f87171; }
+        .session-stat-value.won { color: #4ade80; }
+        .session-stat-label {
+            font-size: 10px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+        .session-milestone {
+            background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.1));
+            border-radius: 12px;
+            padding: 14px 16px;
+            border: 1px solid rgba(251,191,36,0.3);
+        }
+        .milestone-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .milestone-label {
+            font-size: 12px;
+            color: #fbbf24;
+            font-weight: 600;
+        }
+        .milestone-value {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+        .milestone-bar {
+            height: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .milestone-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(251,191,36,0.5);
+        }
+        .session-clicks {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #64748b;
+        }
+        .session-clicks span {
+            color: #93c5fd;
+            font-weight: 600;
+        }
+        @media (max-width: 640px) {
+            .session-tracker {
+                padding: 14px;
+                margin-top: 12px;
+                border-radius: 12px;
+            }
+            .session-tracker-title {
+                font-size: 14px;
+            }
+            .session-stats-grid {
+                gap: 8px;
+            }
+            .session-stat {
+                padding: 10px 6px;
+            }
+            .session-stat-value {
+                font-size: 18px;
+            }
+        }
+
+        /* Desktop Right Sidebar */
+        .desktop-right-sidebar {
+            display: none;
+        }
+        @media (min-width: 1024px) {
+            .desktop-right-sidebar {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                width: 320px;
+                flex-shrink: 0;
+            }
+            .desktop-right-sidebar .session-tracker {
+                margin-top: 0;
+            }
+            .desktop-right-sidebar .historical-sidebar {
+                background: #fffbeb;
+                border: 2px solid #fbbf24;
+                border-radius: 16px;
+                padding: 16px;
+            }
+            .desktop-right-sidebar .historical-sidebar-header h3 {
+                color: #b45309;
+                font-size: 16px;
+            }
+            .desktop-right-sidebar .historical-sidebar-header p {
+                font-size: 11px;
+            }
+            /* Hide inline versions on desktop */
+            .mobile-only-sidebar {
+                display: none !important;
+            }
+        }
+        @media (max-width: 1023px) {
+            /* Show inline versions on mobile/tablet */
+            .mobile-only-sidebar {
+                display: block;
+            }
         }
 
         /* Hide mobile action bar on desktop */
@@ -1271,6 +1454,10 @@
                 align-items: flex-start;
                 gap: 8px;
             }
+            .header-inner > div:first-child {
+                width: auto;
+                align-self: flex-start;
+            }
             .countdown-bar {
                 width: 100%;
                 justify-content: center;
@@ -1476,14 +1663,47 @@
                             </div>
                             <button onclick="testAgainstDrawsFromMobile()" class="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Run Backtest</button>
                         </div>
-                        <!-- Mobile Disclaimer Footer (inside content flow) -->
-                        <div id="mobile-disclaimer" class="hidden md:hidden mt-4 py-3 px-4 bg-gray-800 rounded-lg">
-                            <p class="text-center text-xs text-gray-400">
-                                For entertainment purposes only. Not affiliated with Powerball or any state lottery.
-                            </p>
+                        <!-- Jackpot Chase - Mobile Only (Desktop uses sidebar) -->
+                        <div id="session-tracker" class="session-tracker mobile-only-sidebar">
+                            <div class="session-tracker-header">
+                                <div class="session-tracker-title">
+                                    <span>💰</span> Jackpot Chase
+                                </div>
+                                <span class="session-tracker-reset" onclick="resetSessionStats()">Reset</span>
+                            </div>
+                            <div class="session-stats-grid">
+                                <div class="session-stat">
+                                    <div id="session-tickets" class="session-stat-value">0</div>
+                                    <div class="session-stat-label">Tickets</div>
+                                </div>
+                                <div class="session-stat">
+                                    <div id="session-spent" class="session-stat-value spent">$0</div>
+                                    <div class="session-stat-label">Spent</div>
+                                </div>
+                                <div class="session-stat">
+                                    <div id="session-won" class="session-stat-value won">$0</div>
+                                    <div class="session-stat-label">Won</div>
+                                </div>
+                            </div>
+                            <div class="session-milestone">
+                                <div class="milestone-header">
+                                    <span class="milestone-label">🏆 Road to Millionaire</span>
+                                    <span id="milestone-value" class="milestone-value">$0 / $1,000,000</span>
+                                </div>
+                                <div class="milestone-bar">
+                                    <div id="milestone-progress" class="milestone-progress" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="session-clicks">
+                                Generate clicks: <span id="session-clicks-count">0</span>
+                            </div>
                         </div>
-                        <!-- Historical Winners - Always Visible -->
-                        <div class="historical-sidebar">
+                        <!-- Match Counter - Mobile Only -->
+                        <div id="match-counter" class="mobile-only-sidebar hidden text-center py-2 px-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg">
+                            <span id="match-counter-text" class="text-sm font-bold text-yellow-700"></span>
+                        </div>
+                        <!-- Historical Winners - Mobile Only (Desktop uses sidebar) -->
+                        <div class="historical-sidebar mobile-only-sidebar">
                             <div class="historical-sidebar-header">
                                 <h3><span>🎯</span> Historical Winners</h3>
                                 <p>These tickets match winning numbers from past draws. If played on those dates, they would have won!</p>
@@ -1509,6 +1729,72 @@
                                     <option value="50">50 draws</option>
                                 </select>
                                 <button onclick="testAgainstDrawsFromDesktop()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Run Backtest</button>
+                            </div>
+                        </div>
+                        <!-- Mobile Disclaimer Footer (last element on mobile) -->
+                        <div id="mobile-disclaimer" class="mobile-only-sidebar mt-4 py-3 px-4 bg-gray-800 rounded-lg">
+                            <p class="text-center text-xs text-gray-400">
+                                For entertainment purposes only. Not affiliated with Powerball or any state lottery.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Right Sidebar -->
+                <div class="desktop-right-sidebar">
+                    <!-- Jackpot Chase - Desktop -->
+                    <div id="session-tracker-desktop" class="session-tracker active">
+                        <div class="session-tracker-header">
+                            <div class="session-tracker-title">
+                                <span>💰</span> Jackpot Chase
+                            </div>
+                            <span class="session-tracker-reset" onclick="resetSessionStats()">Reset</span>
+                        </div>
+                        <div class="session-stats-grid">
+                            <div class="session-stat">
+                                <div id="session-tickets-desktop" class="session-stat-value">0</div>
+                                <div class="session-stat-label">Tickets</div>
+                            </div>
+                            <div class="session-stat">
+                                <div id="session-spent-desktop" class="session-stat-value spent">$0</div>
+                                <div class="session-stat-label">Spent</div>
+                            </div>
+                            <div class="session-stat">
+                                <div id="session-won-desktop" class="session-stat-value won">$0</div>
+                                <div class="session-stat-label">Won</div>
+                            </div>
+                        </div>
+                        <div class="session-milestone">
+                            <div class="milestone-header">
+                                <span class="milestone-label">🏆 Road to Millionaire</span>
+                                <span id="milestone-value-desktop" class="milestone-value">$0 / $1,000,000</span>
+                            </div>
+                            <div class="milestone-bar">
+                                <div id="milestone-progress-desktop" class="milestone-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="session-clicks">
+                            Generate clicks: <span id="session-clicks-count-desktop">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Match Counter - Desktop -->
+                    <div id="match-counter-desktop" class="hidden text-center py-2 px-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg">
+                        <span id="match-counter-text-desktop" class="text-sm font-bold text-yellow-700"></span>
+                    </div>
+
+                    <!-- Historical Winners - Desktop -->
+                    <div class="historical-sidebar">
+                        <div class="historical-sidebar-header">
+                            <h3><span>🎯</span> Historical Winners</h3>
+                            <p>These tickets match winning numbers from past draws. If played on those dates, they would have won!</p>
+                        </div>
+                        <div id="historical-matches-content-desktop">
+                            <div class="historical-sidebar-empty">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p>Matching tickets will appear here</p>
                             </div>
                         </div>
                     </div>
@@ -1870,10 +2156,81 @@
             if (costSpan) costSpan.textContent = displayCost.toLocaleString();
         }
 
+        // Format large numbers with K/M suffix
+        function formatCompactCurrency(num) {
+            if (num >= 1000000) {
+                return '$' + (num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1) + 'M';
+            } else if (num >= 10000) {
+                return '$' + (num / 1000).toFixed(num % 1000 === 0 ? 0 : 0) + 'K';
+            } else {
+                return '$' + num.toLocaleString();
+            }
+        }
+
         function updateSessionSummary() {
-            const el = document.getElementById('session-ticket-summary');
-            if (!el) return;
-            el.textContent = `${totalGeneratedTickets.toLocaleString()} tickets | $${totalSessionCost.toLocaleString()}`;
+            // Show the session trackers (mobile and desktop)
+            const tracker = document.getElementById('session-tracker');
+            const trackerDesktop = document.getElementById('session-tracker-desktop');
+            if (tracker && totalGeneratedTickets > 0) {
+                tracker.classList.add('active');
+            }
+            if (trackerDesktop && totalGeneratedTickets > 0) {
+                trackerDesktop.classList.add('active');
+            }
+
+            // Helper to update element by ID
+            const updateElement = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            };
+
+            // Format values with compact notation for large numbers
+            const spentFormatted = formatCompactCurrency(totalSessionCost);
+            const wonFormatted = formatCompactCurrency(totalSessionWinnings);
+
+            // Update mobile stats
+            updateElement('session-tickets', totalGeneratedTickets.toLocaleString());
+            updateElement('session-spent', spentFormatted);
+            updateElement('session-won', wonFormatted);
+            updateElement('session-clicks-count', totalGenerateClicks.toLocaleString());
+
+            // Update desktop stats
+            updateElement('session-tickets-desktop', totalGeneratedTickets.toLocaleString());
+            updateElement('session-spent-desktop', spentFormatted);
+            updateElement('session-won-desktop', wonFormatted);
+            updateElement('session-clicks-count-desktop', totalGenerateClicks.toLocaleString());
+
+            // Update milestone progress (towards $1M prize)
+            const milestoneTarget = 1000000;
+            const progress = Math.min((totalSessionWinnings / milestoneTarget) * 100, 100);
+            const milestoneText = formatCompactCurrency(totalSessionWinnings) + ' / $1M';
+
+            updateElement('milestone-value', milestoneText);
+            updateElement('milestone-value-desktop', milestoneText);
+
+            // Update progress bars
+            const milestoneProgressEl = document.getElementById('milestone-progress');
+            const milestoneProgressDesktopEl = document.getElementById('milestone-progress-desktop');
+            if (milestoneProgressEl) {
+                milestoneProgressEl.style.width = progress + '%';
+            }
+            if (milestoneProgressDesktopEl) {
+                milestoneProgressDesktopEl.style.width = progress + '%';
+            }
+        }
+
+        function resetSessionStats() {
+            totalGeneratedTickets = 0;
+            totalSessionCost = 0;
+            totalSessionWinnings = 0;
+            totalGenerateClicks = 0;
+            updateSessionSummary();
+
+            // Hide both trackers (mobile and desktop)
+            const tracker = document.getElementById('session-tracker');
+            const trackerDesktop = document.getElementById('session-tracker-desktop');
+            if (tracker) tracker.classList.remove('active');
+            if (trackerDesktop) trackerDesktop.classList.remove('active');
         }
 
         function validateTicketInput(inputEl) {
@@ -1947,25 +2304,33 @@
                 </div>
             `).join('')}</div>`;
 
-            // Show mobile backtest section and disclaimer after tickets are generated
+            // Show mobile backtest section and disclaimer after tickets are generated (mobile only)
             const mobileBacktest = document.getElementById('mobile-backtest-section');
             if (mobileBacktest) {
                 mobileBacktest.classList.remove('hidden');
+                mobileBacktest.classList.add('md:hidden'); // Ensure hidden on desktop
             }
             const mobileDisclaimer = document.getElementById('mobile-disclaimer');
             if (mobileDisclaimer) {
                 mobileDisclaimer.classList.remove('hidden');
+                mobileDisclaimer.classList.add('md:hidden'); // Ensure hidden on desktop
             }
-            // Show desktop backtest section
+            // Show desktop backtest section (desktop only)
             const desktopBacktest = document.getElementById('desktop-backtest-section');
             if (desktopBacktest) {
                 desktopBacktest.classList.remove('hidden', 'md:hidden');
-                desktopBacktest.classList.add('md:block');
+                desktopBacktest.classList.add('hidden', 'md:block'); // Hidden on mobile, visible on desktop
             }
 
-            // Handle historical matches content (sidebar is always visible)
+            // Handle historical matches content (sidebar is always visible) - both mobile and desktop
             const sidebarContent = document.getElementById('historical-matches-content');
+            const sidebarContentDesktop = document.getElementById('historical-matches-content-desktop');
             const tierBreakdownEl = document.getElementById('tickets-tier-breakdown');
+            const tierBreakdownDesktopEl = document.getElementById('tickets-tier-breakdown-desktop');
+            const matchCounter = document.getElementById('match-counter');
+            const matchCounterDesktop = document.getElementById('match-counter-desktop');
+            const matchCounterText = document.getElementById('match-counter-text');
+            const matchCounterTextDesktop = document.getElementById('match-counter-text-desktop');
             const matchCount = matchingTickets.length;
 
             document.getElementById('tickets-count').innerHTML = `${data.count} tickets | $${data.cost}`;
@@ -1984,7 +2349,16 @@
                 if (tierCounts['5+0'] > 0) tierLabels.push(`<span class="text-green-500">${tierCounts['5+0']}× ⭐</span>`);
                 if (tierCounts['4+PB'] > 0) tierLabels.push(`<span class="text-blue-500">${tierCounts['4+PB']}× 🎯</span>`);
 
-                tierBreakdownEl.innerHTML = `<span class="text-yellow-600 font-bold">${matchCount} match${matchCount > 1 ? 'es' : ''}!</span> ${tierLabels.join(' ')}`;
+                const tierHTML = `<span class="text-yellow-600 font-bold">${matchCount} match${matchCount > 1 ? 'es' : ''}!</span> ${tierLabels.join(' ')}`;
+
+                // Update match counter between Jackpot Chase and Historical Winners
+                const matchText = `🎉 ${matchCount} match${matchCount > 1 ? 'es' : ''}! ${tierLabels.join(' ')}`;
+                if (matchCounter) { matchCounter.classList.remove('hidden'); }
+                if (matchCounterDesktop) { matchCounterDesktop.classList.remove('hidden'); }
+                if (matchCounterText) { matchCounterText.innerHTML = matchText; }
+                if (matchCounterTextDesktop) { matchCounterTextDesktop.innerHTML = matchText; }
+                if (tierBreakdownEl) tierBreakdownEl.innerHTML = tierHTML;
+                if (tierBreakdownDesktopEl) tierBreakdownDesktopEl.innerHTML = tierHTML;
 
                 // Render matching tickets in sidebar content
                 sidebarContent.innerHTML = matchingTickets.map(t => `
@@ -2002,16 +2376,17 @@
                         ${renderHistoricalMatch(t.historical_match)}
                     </div>
                 `).join('');
+                // Sync desktop sidebar
+                if (sidebarContentDesktop) sidebarContentDesktop.innerHTML = sidebarContent.innerHTML;
             } else {
-                tierBreakdownEl.innerHTML = '';
-                sidebarContent.innerHTML = `
-                    <div class="historical-sidebar-empty">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <p>No historical matches found</p>
-                    </div>
-                `;
+                if (tierBreakdownEl) tierBreakdownEl.innerHTML = '';
+                if (tierBreakdownDesktopEl) tierBreakdownDesktopEl.innerHTML = '';
+                // Hide match counters when no matches
+                if (matchCounter) matchCounter.classList.add('hidden');
+                if (matchCounterDesktop) matchCounterDesktop.classList.add('hidden');
+                const emptyHTML = '<div class="historical-sidebar-empty"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><p>No historical matches found</p></div>';
+                if (sidebarContent) sidebarContent.innerHTML = emptyHTML;
+                if (sidebarContentDesktop) sidebarContentDesktop.innerHTML = emptyHTML;
             }
 
             document.getElementById('test-results').classList.add('hidden');
