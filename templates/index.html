@@ -1596,7 +1596,6 @@
                             <p class="text-xs text-gray-500">See all tickets in the "Tickets" tab for easy printing</p>
                         </div>
                         <span id="tickets-count" class="text-gray-500 font-medium text-center"></span>
-                        <span id="tickets-tier-breakdown" class="text-sm font-medium text-right min-w-[120px]"></span>
                     </div>
                     <div class="tickets-wrapper">
                         <div id="tickets-container">
@@ -1674,25 +1673,25 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Desktop Backtest Section (appears after tickets on desktop only) -->
-                        <div id="desktop-backtest-section" class="hidden md:hidden mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <div class="flex items-center justify-center gap-3">
-                                <span class="text-sm font-medium text-gray-700">Backtest against</span>
-                                <select id="desktop-draws-select" class="border border-gray-300 rounded px-3 py-2 text-sm bg-white">
-                                    <option value="1">1 draw</option>
-                                    <option value="5">5 draws</option>
-                                    <option value="10" selected>10 draws</option>
-                                    <option value="20">20 draws</option>
-                                    <option value="50">50 draws</option>
-                                </select>
-                                <button onclick="testAgainstDrawsFromDesktop()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Run Backtest</button>
-                            </div>
-                        </div>
                         <!-- Mobile Disclaimer Footer (last element on mobile) -->
                         <div id="mobile-disclaimer" class="mobile-only-sidebar mt-4 py-3 px-4 bg-gray-800 rounded-lg">
                             <p class="text-center text-xs text-gray-400">
                                 For entertainment purposes only. Not affiliated with Powerball or any state lottery.
                             </p>
+                        </div>
+                    </div>
+                    <!-- Desktop Backtest Section (OUTSIDE tickets-wrapper grid) -->
+                    <div id="desktop-backtest-section" class="hidden mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div class="flex items-center justify-center gap-3">
+                            <span class="text-sm font-medium text-gray-700">Backtest against</span>
+                            <select id="desktop-draws-select" class="border border-gray-300 rounded px-3 py-2 text-sm bg-white">
+                                <option value="1">1 draw</option>
+                                <option value="5">5 draws</option>
+                                <option value="10" selected>10 draws</option>
+                                <option value="20">20 draws</option>
+                                <option value="50">50 draws</option>
+                            </select>
+                            <button onclick="testAgainstDrawsFromDesktop()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Run Backtest</button>
                         </div>
                     </div>
                 </div>
@@ -2412,8 +2411,9 @@
             // Show desktop backtest section (desktop only)
             const desktopBacktest = document.getElementById('desktop-backtest-section');
             if (desktopBacktest) {
-                desktopBacktest.classList.remove('hidden', 'md:hidden');
-                desktopBacktest.classList.add('hidden', 'md:block'); // Hidden on mobile, visible on desktop
+                // Show only on desktop (md and up)
+                desktopBacktest.classList.remove('hidden');
+                desktopBacktest.classList.add('hidden', 'md:block');
             }
 
             // Handle historical matches sidebar (both mobile and desktop)
