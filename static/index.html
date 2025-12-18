@@ -89,15 +89,68 @@
             animation: pulse-number 0.5s ease-in-out;
         }
 
-        /* Lottery Ticket Card Styles */
-        /* Card Container System */
+        /* ===== PAGE LAYOUT SYSTEM ===== */
         :root {
+            /* Layout Dimensions */
+            --header-height: 72px;
+            --tab-nav-height: 52px;
+            --footer-height: 40px;
+            --left-sidebar-width: 260px;
+            --right-sidebar-width: 280px;
+
+            /* Card System */
             --card-min-width: 160px;
             --card-max-width: 280px;
             --card-gap: 16px;
             --ball-size: 32px;
             --powerball-size: 36px;
+
+            /* Spacing */
+            --section-gap: 16px;
         }
+
+        /* Page Grid Layout */
+        .page-layout {
+            display: grid;
+            grid-template-rows: var(--header-height) var(--tab-nav-height) 1fr var(--footer-height);
+            grid-template-areas:
+                "header"
+                "tabs"
+                "main"
+                "footer";
+            min-height: 100vh;
+        }
+
+        .page-header { grid-area: header; }
+        .page-tabs { grid-area: tabs; }
+        .page-main { grid-area: main; overflow: auto; }
+        .page-footer { grid-area: footer; }
+
+        /* Main Content 3-Column Layout */
+        .content-layout {
+            display: grid;
+            grid-template-columns: var(--left-sidebar-width) 1fr var(--right-sidebar-width);
+            gap: var(--section-gap);
+            padding: var(--section-gap);
+            height: 100%;
+        }
+
+        .left-sidebar {
+            width: var(--left-sidebar-width);
+            flex-shrink: 0;
+        }
+
+        .main-content {
+            min-width: 0;
+            overflow: auto;
+        }
+
+        .right-sidebar {
+            width: var(--right-sidebar-width);
+            flex-shrink: 0;
+        }
+
+        /* Lottery Ticket Card Styles */
 
         .ticket-card {
             background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%);
@@ -1192,6 +1245,21 @@
         }
 
         /* Responsive styles */
+        @media (max-width: 1400px) {
+            :root {
+                --right-sidebar-width: 260px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .content-layout {
+                grid-template-columns: var(--left-sidebar-width) 1fr;
+            }
+            .right-sidebar {
+                display: none;
+            }
+        }
+
         @media (max-width: 1100px) {
             .tickets-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -1199,6 +1267,12 @@
         }
 
         @media (max-width: 900px) {
+            .content-layout {
+                grid-template-columns: 1fr;
+            }
+            .left-sidebar {
+                display: none;
+            }
             .tickets-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
