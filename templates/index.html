@@ -1617,6 +1617,23 @@
                             <span id="tickets-count" class="text-gray-500 font-medium text-center"></span>
                         </div>
                     </div>
+                    
+                    <!-- Match Counter - Mobile Only (Moved to top) -->
+                    <div id="match-counter" class="mobile-only-sidebar hidden text-center py-2 px-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg mb-4">
+                        <span id="match-counter-text" class="text-sm font-bold text-yellow-700"></span>
+                    </div>
+
+                    <!-- Historical Winners - Mobile Only (Moved to top) -->
+                    <div id="mobile-historical-sidebar" class="historical-sidebar mobile-only-sidebar hidden mb-4">
+                        <div class="historical-sidebar-header">
+                            <h3><span>🎯</span> Historical Winners</h3>
+                            <p>These tickets match winning numbers from past draws. If played on those dates, they would have won!</p>
+                        </div>
+                        <div id="historical-matches-content">
+                            <!-- Content injected via JS -->
+                        </div>
+                    </div>
+
                     <div class="tickets-wrapper">
                         <div id="tickets-container">
                             <div class="text-center py-12 text-gray-400">
@@ -1674,25 +1691,7 @@
                                 Generate clicks: <span id="session-clicks-count">0</span>
                             </div>
                         </div>
-                        <!-- Match Counter - Mobile Only -->
-                        <div id="match-counter" class="mobile-only-sidebar hidden text-center py-2 px-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg">
-                            <span id="match-counter-text" class="text-sm font-bold text-yellow-700"></span>
-                        </div>
-                        <!-- Historical Winners - Mobile Only (Desktop uses sidebar) -->
-                        <div class="historical-sidebar mobile-only-sidebar">
-                            <div class="historical-sidebar-header">
-                                <h3><span>🎯</span> Historical Winners</h3>
-                                <p>These tickets match winning numbers from past draws. If played on those dates, they would have won!</p>
-                            </div>
-                            <div id="historical-matches-content">
-                                <div class="historical-sidebar-empty">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <p>Matching tickets will appear here</p>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Match Counter & Historical Sidebar moved to top -->
                         <!-- Mobile Disclaimer Footer (last element on mobile) -->
                         <div id="mobile-disclaimer" class="mobile-only-sidebar mt-4 py-3 px-4 bg-gray-800 rounded-lg">
                             <p class="text-center text-xs text-gray-400">
@@ -2413,6 +2412,9 @@
                     // Check for big win (>= $1M)
                     if (prize === 'JACKPOT' || prizeVal >= 1000000) {
                         hasBigWin = true;
+                        if (prize === 'JACKPOT') {
+                            isJackpot = true;
+                        }
                     }
                 } else {
                     nonMatchingTickets.push(t);
@@ -2420,7 +2422,8 @@
             });
 
             if (hasBigWin) {
-                triggerBigWinConfetti();
+                // longer duration for jackpot
+                triggerBigWinConfetti(isJackpot ? 15000 : 5000);
             }
 
             totalSessionWinnings += batchWinnings;
@@ -2506,6 +2509,10 @@
                 if (matchCounterText) matchCounterText.innerHTML = matchText;
                 if (matchCounterTextDesktop) matchCounterTextDesktop.innerHTML = matchText;
 
+                // Show mobile historical sidebar
+                const mobileSidebar = document.getElementById('mobile-historical-sidebar');
+                if (mobileSidebar) mobileSidebar.classList.remove('hidden');
+
                 // Render matching tickets in sidebar
                 historicalContent.innerHTML = matchingTickets.map(t => `
                     <div class="ticket-card mb-3" style="border: 2px solid #fbbf24;">
@@ -2529,7 +2536,16 @@
                 // Also update desktop sidebar
                 if (historicalContentDesktop) historicalContentDesktop.innerHTML = historicalContent.innerHTML;
             } else {
-                tierBreakdownEl.innerHTML = '';
+                const tierBreakdownEl = document.getElementById('tier-breakdown'); // Assuming tierBreakdownEl is defined elsewhere or needs to be fetched here
+                if (tierBreakdownEl) tierBreakdownEl.innerHTML = '';
+                // Hide mobile historical sidebar if no matches
+                const mobileSidebar = document.getElementById('mobile-historical-sidebar');
+                if (mobileSidebar) mobileSidebar.classList.add('hidden');
+                
+                // Hide match counters
+                const matchCounter = document.getElementById('match-counter');
+                if (matchCounter) matchCounter.classList.add('hidden');
+                
                 const emptyState = `
                     <div class="historical-sidebar-empty">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2541,9 +2557,8 @@
                 if (historicalContentDesktop) historicalContentDesktop.innerHTML = emptyState;
 
                 // Hide match counter when no matches
-                const matchCounter = document.getElementById('match-counter');
-                const matchCounterDesktop = document.getElementById('match-counter-desktop');
                 if (matchCounter) matchCounter.classList.add('hidden');
+                const matchCounterDesktop = document.getElementById('match-counter-desktop');
                 if (matchCounterDesktop) matchCounterDesktop.classList.add('hidden');
             }
 
@@ -2669,8 +2684,7 @@
             `;
         }
 
-        function triggerBigWinConfetti() {
-            var duration = 5 * 1000;
+        function triggerBigWinConfetti(duration = 5000) {
             var animationEnd = Date.now() + duration;
             var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
