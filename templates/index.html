@@ -244,20 +244,25 @@
             color: #fbbf24;
         }
 
-        /* Tickets Grid with Historical Winners Column */
+        /* Tickets Grid - single column on desktop, 2-col on mobile for inline sidebars */
         .tickets-wrapper {
-            display: grid;
-            grid-template-columns: minmax(0, 1.1fr) minmax(260px, 320px);
-            gap: 24px;
-            align-items: flex-start;
+            display: block;
+            width: 100%;
+        }
+        @media (max-width: 1023px) {
+            .tickets-wrapper {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
         }
 
         .tickets-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: var(--card-gap);
             padding: 4px;
-            justify-content: center;
+            width: 100%;
         }
 
         /* Historical Winners Sidebar - Always visible */
@@ -307,26 +312,16 @@
             opacity: 0.5;
         }
 
-        @media (max-width: 1200px) {
-            .tickets-wrapper {
-                grid-template-columns: 1fr;
-            }
-            .historical-sidebar {
-                min-width: unset;
-            }
-        }
-
         @media (max-width: 768px) {
-            .tickets-wrapper {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
             .tickets-grid {
                 grid-template-columns: minmax(0, 1fr);
                 gap: 12px;
             }
             .ticket-card {
                 max-width: 100%;
+            }
+            .historical-sidebar {
+                min-width: unset;
             }
         }
 
@@ -1617,7 +1612,10 @@
                             <h2 class="text-xl font-bold">Quick Ticket View</h2>
                             <p class="text-xs text-gray-500">See all tickets in the "Tickets" tab for easy printing</p>
                         </div>
-                        <span id="tickets-count" class="text-gray-500 font-medium text-center"></span>
+                        <div class="flex flex-col items-end">
+                            <span id="tickets-count" class="text-gray-500 font-medium text-center"></span>
+                            <div id="tickets-tier-breakdown" class="text-sm"></div>
+                        </div>
                     </div>
                     <div class="tickets-wrapper">
                         <div id="tickets-container">

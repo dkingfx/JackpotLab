@@ -244,42 +244,37 @@
             color: #fbbf24;
         }
 
-        /* Tickets Grid with Historical Winners Column */
+        /* Tickets Grid - single column on desktop, 2-col on mobile for inline sidebars */
         .tickets-wrapper {
-            display: grid;
-            grid-template-columns: minmax(0, 1.1fr) minmax(260px, 320px);
-            gap: 24px;
-            align-items: flex-start;
+            display: block;
+            width: 100%;
+        }
+        @media (max-width: 1023px) {
+            .tickets-wrapper {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
         }
 
         .tickets-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: var(--card-gap);
             padding: 4px;
-            justify-content: center;
-        }
-
-        @media (max-width: 1200px) {
-            .tickets-wrapper {
-                grid-template-columns: 1fr;
-            }
-            .historical-sidebar {
-                min-width: unset;
-            }
+            width: 100%;
         }
 
         @media (max-width: 768px) {
-            .tickets-wrapper {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
             .tickets-grid {
                 grid-template-columns: minmax(0, 1fr);
                 gap: 12px;
             }
             .ticket-card {
                 max-width: 100%;
+            }
+            .historical-sidebar {
+                min-width: unset;
             }
         }
 
