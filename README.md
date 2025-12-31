@@ -44,7 +44,7 @@ This shifts probability toward observed distributions while still allowing all n
 
 ## Data Source
 
-Historical data from [New York State Open Data](https://data.ny.gov) - 1,876 draws from 2010-2025.
+Historical data from [NY Open Data](https://data.ny.gov/Government-Finance/Lottery-Powerball-Winning-Numbers-Beginning-2010/d6yy-54nr) provided by the New York State Gaming Commission.
 
 ## Disclaimer
 
